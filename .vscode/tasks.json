@@ -1,0 +1,688 @@
+{
+    "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "entry",
+            "type": "promptString",
+            "description": "文件路径或文件夹路径"
+        },
+        {
+            "id": "crate",
+            "type": "promptString",
+            "description": "crate 名"
+        },
+        {
+            "id": "example",
+            "type": "promptString",
+            "description": "示例名"
+        },
+        {
+            "id": "test",
+            "type": "promptString",
+            "description": "测试名"
+        },
+        {
+            "id": "bench",
+            "type": "promptString",
+            "description": "基准测试名"
+        },
+        {
+            "id": "file",
+            "type": "promptString",
+            "description": "文件名"
+        }
+    ],
+    "tasks": [
+        {
+            "label": "cargoe: 翻译 Rust 模块",
+            "type": "shell",
+            "command": "cargoe",
+            "args": ["t", "module"],
+            "problemMatcher": [],
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "cmtor: 翻译文件/文件夹",
+            "type": "shell",
+            "command": "cmtor",
+            "args": ["p", "${input:entry}"],
+            "problemMatcher": [],
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 运行",
+            "type": "cargo",
+            "command": "run",
+            "args": ["-v", "--all-features"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Nightly 运行",
+            "type": "cargo",
+            "command": "+nightly",
+            "args": ["run", "-v", "--all-features","--", "use", "rustcc2"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 运行指定的 crate",
+            "type": "cargo",
+            "command": "run",
+            "args": ["-v", "-p", "${input:crate}", "--all-features"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Nightly 运行指定的 crate",
+            "type": "cargo",
+            "command": "+nightly",
+            "args": ["run", "-v", "-p", "${input:crate}", "--all-features"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Clippy",
+            "type": "cargo",
+            "command": "clippy",
+            "args": ["-v", "--all-features"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "reveal": "silent",
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Nightly Clippy",
+            "type": "cargo",
+            "command": "+nightly",
+            "args": ["clippy", "-v", "--all-features"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "reveal": "silent",
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 构建开发版本",
+            "type": "cargo",
+            "command": "build",
+            "args": ["-v"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Nightly 构建开发版本",
+            "type": "cargo",
+            "command": "+nightly",
+            "args": ["build", "-v"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 构建生产版本",
+            "type": "cargo",
+            "command": "build",
+            "args": ["-v", "--release"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "build",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Nightly 构建生产版本",
+            "type": "cargo",
+            "command": "+nightly",
+            "args": ["build", "-v", "--release", "-Ztimings"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "build",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 构建生产版本 (特定于当前 CPU)",
+            "type": "cargo",
+            "command": "build",
+            "args": ["-v", "--release"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUSTFLAGS": "-C target-cpu=native",
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "build",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Nightly 构建生产版本 (特定于当前 CPU)",
+            "type": "cargo",
+            "command": "+nightly",
+            "args": ["build", "-v", "--release", "-Ztimings"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUSTFLAGS": "-C target-cpu=native",
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "build",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 检查",
+            "type": "cargo",
+            "command": "check",
+            "args": ["-v"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "reveal": "silent",
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Nightly 检查",
+            "type": "cargo",
+            "command": "+nightly",
+            "args": ["check", "-v"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "reveal": "silent",
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 清理",
+            "type": "cargo",
+            "command": "clean",
+            "args": ["-v"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "reveal": "silent",
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Nightly 清理",
+            "type": "cargo",
+            "command": "+nightly",
+            "args": ["clean", "-v"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "reveal": "silent",
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 文档",
+            "type": "cargo",
+            "command": "doc",
+            "args": [
+                "-v",
+                "--workspace",
+                "--document-private-items",
+                "--all-features",
+                "--open"
+            ],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "reveal": "silent",
+                "focus": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 文档",
+            "type": "cargo",
+            "command": "+nightly",
+            "args": [
+                "doc",
+                "-v",
+                "--workspace",
+                "--document-private-items",
+                "--all-features",
+                "--open"
+            ],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "reveal": "silent",
+                "focus": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Nightly 测试",
+            "type": "cargo",
+            "command": "+nightly",
+            "args": ["test", "-v", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试工作空间",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--workspace", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试指定的测试",
+            "type": "cargo",
+            "command": "test",
+            "args": ["${input:test}", "-v", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试被忽略的",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--", "--ignored", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试库 crate",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--lib", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试二进制 crate",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--bins", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试指定的二进制 crate",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--bin", "${input:crate}", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 单线程测试",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--", "--nocapture", "--test-threads=1"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试示例",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--examples", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试指定的示例",
+            "type": "cargo",
+            "command": "test",
+            "args": [
+                "-v",
+                "--example",
+                "${input:example}",
+                "--",
+                "--nocapture"
+            ],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试文档",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--doc", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 基准测试",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--benches", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试指定的基准测试",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--bench", "${input:bench}", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 集成测试",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--tests", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: 测试指定的集成测试",
+            "type": "cargo",
+            "command": "test",
+            "args": ["-v", "--test", "${input:file}", "--", "--nocapture"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "group": "test",
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Lib llvm-lines",
+            "type": "cargo",
+            "command": "llvm-lines",
+            "args": ["--lib"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Rust: Bin llvm-lines",
+            "type": "cargo",
+            "command": "llvm-lines",
+            "args": ["--bin", "${input:crate}"],
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "env": {
+                    "RUST_BACKTRACE": "1"
+                }
+            },
+            "presentation": {
+                "focus": true,
+                "clear": true
+            }
+        }
+    ]
+}

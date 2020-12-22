@@ -1,0 +1,19 @@
+[package]
+name = "crm"
+version = "0.0.1"
+authors = ["wtklbm <wtklbm@gmail.com>"]
+description = "`crm` can help you easy and fast switch between different cargo registries, now include: `aliyun`, `rustcc1`, `rustcc2`, `sjtu`, `tuna`, `ustc`."
+homepage = "https://github.com/wtklbm/crm"
+repository = "https://github.com/wtklbm/crm.git"
+edition = "2018"
+license = "MIT OR Apache-2.0"
+keywords = ["cargo", "registry"]
+exclude = [".vscode/**"]
+
+[profile.release]
+lto = true
+panic = "abort"
+incremental = true
+
+[dependencies]
+toml = "0.5.8"
