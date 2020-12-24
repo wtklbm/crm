@@ -19,7 +19,7 @@
 
 use std::env::args_os;
 
-use crate::{constants::RUST_LANG, registry::Registry, util::not_command};
+use crate::{registry::Registry, util::not_command};
 
 type Args = (String, Vec<String>);
 
@@ -57,7 +57,7 @@ pub fn handle_command((command, args): Args) {
         "list" => println!("{}", r.list()),
 
         // 恢复默认镜像
-        "default" => r.select(Some(&RUST_LANG.to_string())),
+        "default" => r.default(),
 
         // 切换镜像
         "use" => r.select(args.get(0)),
