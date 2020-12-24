@@ -2,7 +2,7 @@
 //!
 //! 该模块用于操作镜像。包括简单的增删改查操作。
 
-use crate::runtime::RuntimeConfig;
+use crate::{constants::RUST_LANG, runtime::RuntimeConfig};
 use crate::{
     cargo::CargoConfig,
     util::{is_registry_addr, is_registry_name},
@@ -91,12 +91,7 @@ impl Registry {
     }
 
     /// 恢复为默认镜像
-    pub fn default(&self) {
-        let (name, addr) = self.current();
-
-        match addr {
-            Some(addr) => println!("{}: {}", name, addr),
-            None => println!("{}", name),
-        };
+    pub fn default(&mut self) {
+        self.select(Some(&RUST_LANG.to_string()));
     }
 }
