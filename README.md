@@ -2,7 +2,7 @@
 
 `crm` 可以帮助您快速的切换不同的 `cargo` 镜像, 现在包括: `aliyun`, `rustcc1`, `rustcc2`, `sjtu`, `tuna`, `ustc`。
 
-# `Install`
+# `Install` (Nightly channel)
 
 ```bash
 $ cargo install crm
