@@ -2,7 +2,7 @@
 name = "crm"
 version = "0.0.2"
 authors = ["wtklbm <wtklbm@gmail.com>"]
-description = "`crm` can help you easy and fast switch between different cargo registries, now include: `aliyun`, `rustcc1`, `rustcc2`, `sjtu`, `tuna`, `ustc`."
+description = "`crm` can help you easy and fast switch between different cargo registries, now include: `rustcc`, `sjtu`, `tuna`, `ustc`, `rsproxy`."
 homepage = "https://github.com/wtklbm/crm"
 repository = "https://github.com/wtklbm/crm.git"
 edition = "2018"
