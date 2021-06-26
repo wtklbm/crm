@@ -1,6 +1,6 @@
 # `crm -- Cargo registry manager`
 
-`crm` 可以帮助您快速的切换不同的 `cargo` 镜像, 现在包括: `aliyun`, `rustcc1`, `rustcc2`, `sjtu`, `tuna`, `ustc`。
+`crm` 可以帮助您快速的切换不同的 `cargo` 镜像, 现在包括: `rustcc`, `sjtu`, `tuna`, `ustc`, `rsproxy`。
 
 # `Install` (Nightly channel)
 
