@@ -37,18 +37,21 @@ pub const CRMRC_FILE: &str = r#"
 # Grammar description:
 # registry_name = registry_addr
 
-# 阿里云
-aliyun = https://code.aliyun.com/rustcc/crates.io-index
 # 官方源
 rust-lang = https://github.com/rust-lang/crates.io-index
-# `rustcc` 社区 1，宽带为 `5 MB`
-rustcc1 = git://crates.rustcc.cn/crates.io-index
-# `rustcc` 社区 2，宽带为 `10 MB`
-rustcc2 = git://crates.rustcc.com/crates.io-index
+
+# `rustcc` 社区
+rustcc = git://crates.rustcc.cn/crates.io-index
+
 # 上海交通大学
 sjtu = https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index
+
 # 清华大学
 tuna = https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git
+
 # 中科大
 ustc = git://mirrors.ustc.edu.cn/crates.io-index
+
+# 字节跳动
+rsproxy = https://rsproxy.cn/crates.io-index
 "#;
