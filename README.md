@@ -1,8 +1,8 @@
 # `crm -- Cargo registry manager`
 
-`crm` 可以帮助您快速的切换不同的 `cargo` 镜像, 现在包括: `rustcc`, `sjtu`, `tuna`, `ustc`, `rsproxy`。
+[`crm`](https://github.com/wtklbm/crm) 是一个镜像管理程序，能够对镜像源进行简单的添加、修改、删除操作，并能帮助您快速的切换不同的 `cargo` 镜像。`crm` 内置了 5 种国内镜像源，它们分别是: `rustcc`, `sjtu`, `tuna`, `ustc`, `rsproxy`。
 
-# `Install` (Nightly channel)
+# `Install`
 
 ```bash
 $ cargo install crm
