@@ -32,7 +32,14 @@ pub const CARGO: &str = ".cargo";
 /// `${CARGO_HOME}/.cargo` 目录下的 `config` 文件
 pub const CONFIG: &str = "config";
 
+/// `dl`
 pub const DL: &str = "dl";
+
+/// 应用程序名称
+pub const APP_NAME:&str = "crm";
+
+/// 应用程序版本号
+pub const APP_VERSION: &str = "0.1.0";
 
 /// 默认镜像内容
 pub const CRMRC_FILE: &str = r#"
