@@ -2,12 +2,12 @@
 name = "crm"
 version = "0.0.3"
 authors = ["wtklbm <wtklbm@gmail.com>"]
-description = "`crm` can help you easy and fast switch between different cargo registries, now include: `rustcc`, `sjtu`, `tuna`, `ustc`, `rsproxy`."
+description = "`crm` can help you easy and fast switch between different cargo registries, now include: rustcc, sjtu, tuna, ustc, rsproxy."
 homepage = "https://github.com/wtklbm/crm"
 repository = "https://github.com/wtklbm/crm.git"
 edition = "2018"
 license = "MIT OR Apache-2.0"
-keywords = ["cargo", "registry"]
+keywords = ["cargo", "crates.io", "registry"]
 exclude = [".vscode/**"]
 
 [profile.release]
