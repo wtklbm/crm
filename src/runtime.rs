@@ -135,7 +135,7 @@ impl RuntimeConfig {
         let mut config = toml::from_str::<Value>(&data);
 
         if let Err(_) = config {
-            eprint!("由于版本更新，旧版的配置文件已不再兼容，请删除 ~/.crmrc 文件后重试");
+            eprint!("解析运行时配置失败，请手动删除 ~/.crmrc 文件后重试");
             process::exit(-1);
         }
 
