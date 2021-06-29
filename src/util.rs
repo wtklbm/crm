@@ -51,16 +51,24 @@ pub fn is_registry_addr(addr: Option<&String>) -> &str {
     addr.unwrap().as_str()
 }
 
+pub fn is_registry_dl(dl: Option<&String>) -> &str {
+    if dl.is_none() {
+        println!("请输入正确的 dl。\n  每一个镜像源都是一个 Git 存储库，而在该存储库的根目录下有一个 config.json 文件，\n  其中，dl 属性是 config.json 文件中的一个字段。");
+        process::exit(0);
+    }
+
+    dl.unwrap().as_str()
+}
+
 pub fn not_command(command: &str) {
     let r = r#"
-  crm add <registry_name> <registry_addr>     在镜像配置文件中添加镜像
-  crm current                                 获取当前所使用的镜像
-  crm default                                 恢复为默认的镜像
-  crm list                                    从镜像配置文件中获取镜像列表
-  crm remove <registry_name>                  在镜像配置文件中删除镜像
-  crm update <registry_name> <registry_addr>  在镜像配置文件中更新镜像
-  crm use <registry_name>                     切换为要使用的镜像
-    "#;
-    println!("{} 命令无效。参考:\n{}", command, r);
+  crm current                 获取当前所使用的镜像
+  crm default                 恢复为默认的镜像
+  crm list                    从镜像配置文件中获取镜像列表
+  crm remove <name>           在镜像配置文件中删除镜像
+  crm save <name> <addr> <dl> 在镜像配置文件中添加/更新镜像
+  crm use <name>              切换为要使用的镜像
+"#;
+    println!("{} 命令无效。参考:\n{}", command, r.trim());
     process::exit(0);
 }
