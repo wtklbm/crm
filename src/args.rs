@@ -78,13 +78,11 @@ pub fn handle_command((command, args): Args) {
         command => {
             let name = args.get(0);
             let addr = args.get(1);
+            let dl = args.get(2);
 
             match command {
-                // 添加镜像
-                "add" => r.add(name, addr),
-
-                // 更新镜像
-                "update" => r.update(name, addr),
+                // 添加/更新镜像
+                "save" => r.save(name, addr, dl),
 
                 _ => not_command(command),
             }
