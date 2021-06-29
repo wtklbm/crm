@@ -60,6 +60,22 @@ pub fn is_registry_dl(dl: Option<&String>) -> &str {
     dl.unwrap().as_str()
 }
 
+pub fn append_end_spaces(value: &str, total_len: Option<usize>) -> String {
+    let size = if total_len.is_none() {
+        15
+    } else {
+        total_len.unwrap()
+    };
+
+    let pad = if value.len() < size {
+        " ".repeat(size - value.len())
+    } else {
+        "".to_string()
+    };
+
+    format!("{}{}", value, pad)
+}
+
 pub fn not_command(command: &str) {
     let r = r#"
   crm best                    评估网络延迟并自动切换到最优的镜像
