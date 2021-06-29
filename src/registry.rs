@@ -2,7 +2,8 @@
 //!
 //! 该模块用于操作镜像。包括简单的增删改查操作。
 
-use std::process;
+use mrq::Status;
+use std::{process, time::SystemTime};
 
 use crate::{
     cargo::CargoConfig,
@@ -98,5 +99,94 @@ impl Registry {
     /// 恢复为默认镜像
     pub fn default(&mut self) {
         self.select(Some(&RUST_LANG.to_string()));
+    }
+
+    /// 评估网络延迟并使用最优的镜像
+    pub fn best(&mut self) {
+        let s = self.test_status(None);
+        let (registry_name, _) = s.first().unwrap();
+
+        self.select(Some(registry_name));
+        println!("已切换到 {} 镜像源", registry_name);
+    }
+
+    /// 测试指定的镜像源延迟
+    fn test_by_name(&self, name: &str) -> (String, Option<u128>) {
+        if let Some(rd) = self.rc.get(name) {
+            let dl = rd.dl.clone();
+            let crate_name = "crm";
+            let version = "0.0.1";
+
+            // 拼接链接地址
+            let url = if !dl.ends_with("/api/v1/crates") {
+                dl.replace("{crate}", crate_name)
+                    .replace("{version}", version)
+            } else {
+                format!("{}/{}/{}/download", dl, crate_name, version)
+            };
+
+            // 当前系统的时间
+            let time_now = SystemTime::now();
+
+            if let Ok(response) = mrq::get(url).with_timeout(10).send() {
+                match response.status {
+                    Status::Success(_) | Status::Redirect(_) => {
+                        // 获取当前时间和 `time_now` 之间的时间差
+                        if let Ok(elapsed) = time_now.elapsed() {
+                            return (name.to_string(), Some(elapsed.as_millis()));
+                        }
+                    }
+                    _ => (),
+                };
+            }
+        }
+
+        return (name.to_string(), None);
+    }
+
+    /// 测试镜像源状态
+    fn test_status(&self, name: Option<&String>) -> Vec<(String, Option<u128>)> {
+        let mut status: Vec<(String, Option<u128>)> = Vec::new();
+
+        // 如果没有传递镜像名
+        if let None = name {
+            // 进行完整性测试
+            self.rc.registry_names().iter().for_each(|name| {
+                status.push(self.test_by_name(name));
+            });
+        } else {
+            // 仅测试当前镜像
+            let name = is_registry_name(name).trim();
+            status.push(self.test_by_name(name));
+        }
+
+        // 对毫秒数进行排序
+        status.sort_by(|a, b| a.1.cmp(&b.1));
+
+        status
+    }
+
+    /// 测试镜像源延迟
+    pub fn test(&self, name: Option<&String>) {
+        // 拼接状态字符串
+        let status: Vec<String> = self
+            .test_status(name)
+            .iter()
+            .map(|(name, status)| {
+                let pad = if name.len() < 15 {
+                    " ".repeat(15 - name.len())
+                } else {
+                    "".to_string()
+                };
+
+                if let None = status {
+                    format!("{}{} -- failed", name, pad)
+                } else {
+                    format!("{}{} -- {} ms", name, pad, status.unwrap())
+                }
+            })
+            .collect();
+
+        println!("{}", status.join("\n"));
     }
 }
