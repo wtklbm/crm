@@ -4,15 +4,16 @@
 //! 由该模块完成对参数的解析和处理。
 //!
 //! 目前可接收的运行时参数主要包括:
-//!   - `add <registry_name> <registry_addr>`: 在镜像配置文件中添加镜像
-//!   - `current`: 获取当前所使用的镜像
-//!   - `default`: 恢复为默认的镜像
-//!   - `list`: 从镜像配置文件中获取镜像列表
-//!   - `remove <registry_name>`: 在镜像配置文件中删除镜像
-//!   - `update <registry_name> <registry_addr>`: 在镜像配置文件中更新镜像
-//!   - `use <registry_name>`: 切换为要使用的镜像
+//!   - `crm best`:                    评估网络延迟并使用最优的镜像
+//!   - `crm current`:                 获取当前所使用的镜像
+//!   - `crm default`:                 恢复为默认的镜像
+//!   - `crm list`:                    从镜像配置文件中获取镜像列表
+//!   - `crm remove <name>`:           在镜像配置文件中删除镜像
+//!   - `crm save <name> <addr> <dl>`: 在镜像配置文件中添加/更新镜像
+//!   - `crm test [name]`:             下载测试包以评估网络延迟
+//!   - `crm use <name>`:              切换为要使用的镜像
 //!
-//! 其中，`add`、`update`、`remove` 命令只修改 `${HOME}/.crmrc` 配置文件，
+//! 其中，`save`、`remove` 命令只修改 `${HOME}/.crmrc` 配置文件，
 //! 而不对 `${CARGO_HOME}/.cargo/config` 文件做任何的操作。
 //! 如果需要操作 `.crmrc` 镜像配置时仍要修改 `config` 配置文件，
 //! 请在操作完镜像配置文件后手动执行相应的操作镜像的命令。
