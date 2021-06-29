@@ -17,3 +17,4 @@ incremental = true
 
 [dependencies]
 toml = "0.5.8"
+mrq = { version = "0.1.0", features = ["https"] }
