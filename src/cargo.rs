@@ -116,17 +116,18 @@ impl CargoConfig {
 
     /// 从 `Cargo` 配置文件中获取正在使用的镜像，其中 `rust-lang` 是 `Cargo` 默认使用的镜像。
     pub fn current(&self) -> (String, Option<String>) {
-        let rust_lang = RUST_LANG.to_string();
+        let mut name = RUST_LANG.to_string();
 
         // 从配置文件中获取镜像名
-        let name =
-            match self.data.borrow_mut().get_mut(SOURCE).unwrap()[CRATES_IO].get(REPLACE_WITH) {
-                Some(current) => match current {
-                    VString(str) => str.to_string(),
-                    _ => rust_lang,
-                },
-                None => rust_lang,
-            };
+        if let Some(s) = self.data.borrow_mut().get_mut(SOURCE) {
+            if let Some(i) = s.get(CRATES_IO) {
+                if let Some(r) = i.get(REPLACE_WITH) {
+                    if let VString(str) = r {
+                        name = str.to_string()
+                    }
+                }
+            }
+        }
 
         // 从配置文件中根据镜像名获取镜像地址
         let data = self.data.borrow();
@@ -190,6 +191,36 @@ impl CargoConfig {
             .insert(REGISTRY.to_string(), VString(addr));
     }
 
+    /// 根据镜像名删除 `config` 中的旧的镜像属性
+    fn remove_old_registry(&mut self, registry_name: &str) {
+        if registry_name.eq(RUST_LANG) {
+            return;
+        }
+
+        // 如果没有 `[source.xxx]` 属性
+        if self
+            .data
+            .borrow_mut()
+            .get_mut(SOURCE)
+            .unwrap()
+            .as_table()
+            .unwrap()
+            .get(registry_name)
+            .is_none()
+        {
+            return;
+        }
+
+        self.data
+            .borrow_mut()
+            .get_mut(SOURCE)
+            .unwrap()
+            .as_table_mut()
+            .unwrap()
+            .remove(registry_name)
+            .unwrap();
+    }
+
     /// 切换 `Cargo` 配置文件中正在使用的镜像
     pub fn use_registry(
         &mut self,
@@ -200,12 +231,20 @@ impl CargoConfig {
             return Err(registry_name.to_string());
         }
 
+        // 获取老的镜像名
+        let (old_name, _) = self.current();
+
+        // 替换镜像源
         self.replace_with(registry_name);
+
+        // 删除老的镜像属性
+        self.remove_old_registry(&old_name);
 
         if registry_name.eq(RUST_LANG) {
             return Ok(());
         }
 
+        // 追加新的镜像属性
         self.append_registry(
             registry_name,
             registry_description.unwrap().registry.to_string(),
