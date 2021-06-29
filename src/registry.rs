@@ -101,7 +101,7 @@ impl Registry {
         self.select(Some(&RUST_LANG.to_string()));
     }
 
-    /// 评估网络延迟并使用最优的镜像
+    /// 评估网络延迟并自动切换到最优的镜像
     pub fn best(&mut self) {
         let s = self.test_status(None);
         let (registry_name, _) = s.first().unwrap();
