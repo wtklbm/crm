@@ -2,10 +2,13 @@
 //!
 //! 该模块用于操作镜像。包括简单的增删改查操作。
 
-use crate::{constants::RUST_LANG, runtime::RuntimeConfig};
+use std::process;
+
 use crate::{
     cargo::CargoConfig,
-    util::{is_registry_addr, is_registry_name},
+    constants::RUST_LANG,
+    runtime::RuntimeConfig,
+    util::{is_registry_addr, is_registry_dl, is_registry_name},
 };
 
 /// 镜像对象
@@ -29,7 +32,7 @@ impl Registry {
     pub fn select(&mut self, name: Option<&String>) {
         let name = is_registry_name(name).trim();
 
-        if let Err(name) = self.cargo.use_registry(name, self.rc.map.get(name)) {
+        if let Err(name) = self.cargo.use_registry(name, self.rc.get(name)) {
             let keys = self.rc.to_key_string();
 
             if keys.is_empty() {
@@ -49,25 +52,27 @@ impl Registry {
     pub fn remove(&mut self, name: Option<&String>) {
         let name = is_registry_name(name).trim();
 
+        if let Some(_) = self.rc.get_default(name) {
+            println!("请不要删除内置镜像");
+            process::exit(-1);
+        }
+
+        if let None = self.rc.get_extend(name) {
+            println!("删除失败，{:?} 镜像不存在", name);
+            process::exit(-1);
+        }
+
         self.rc.remove(name);
         self.rc.write();
     }
 
-    /// 添加镜像
-    pub fn add(&mut self, name: Option<&String>, addr: Option<&String>) {
+    /// 添加/更新镜像
+    pub fn save(&mut self, name: Option<&String>, addr: Option<&String>, dl: Option<&String>) {
         let name = is_registry_name(name).trim();
         let addr = is_registry_addr(addr).trim();
+        let dl = is_registry_dl(dl).trim();
 
-        self.rc.add(name, addr);
-        self.rc.write()
-    }
-
-    /// 更新镜像
-    pub fn update(&mut self, name: Option<&String>, addr: Option<&String>) {
-        let name = is_registry_name(name).trim();
-        let addr = is_registry_addr(addr).trim();
-
-        self.rc.update(name, addr);
+        self.rc.save(name, addr, dl);
         self.rc.write();
     }
 
@@ -82,7 +87,7 @@ impl Registry {
         let addr = match addr {
             Some(addr) => Some(addr),
             None => match self.rc.get(&name) {
-                Some(addr) => Some(addr.to_string()),
+                Some(addr) => Some(addr.registry.clone()),
                 None => None,
             },
         };
