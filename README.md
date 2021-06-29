@@ -1,6 +1,6 @@
-# crm ([crates.io](https://crates.io) registry manager)
+# crm (Cargo registry manager)
 
-[`crm`](https://github.com/wtklbm/crm) 是一个在终端运行的镜像管理程序，能够对 `crates.io` 镜像源进行简单的添加、修改、删除操作，并能帮助您快速的切换不同的 `crates.io` 镜像源。`crm` 内置了 5 种国内镜像源，它们分别是: `rustcc`, `sjtu`, `tuna`, `ustc`, `rsproxy`。
+[`crm`](https://github.com/wtklbm/crm) 是一个在终端运行的镜像管理程序，能够对 `Cargo` 镜像源进行简单的添加、修改、删除操作，并能帮助您快速的切换不同的 `Cargo` 镜像源。`crm` 内置了 5 种国内镜像源，它们分别是: `rustcc`, `sjtu`, `tuna`, `ustc`, `rsproxy`。
 
 
 
