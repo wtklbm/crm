@@ -104,8 +104,14 @@ impl Registry {
 
     /// 评估网络延迟并自动切换到最优的镜像
     pub fn best(&mut self) {
-        let s = self.test_status(None);
-        let (registry_name, _) = s.first().unwrap();
+        let tested = self.test_status(None);
+        let found = tested.iter().find(|v| v.1.is_some());
+
+        if found.is_none() {
+            return println!("没有可切换的镜像源");
+        }
+
+        let registry_name = &found.unwrap().0;
 
         self.select(Some(registry_name));
         println!("已切换到 {} 镜像源", registry_name);
