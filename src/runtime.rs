@@ -21,7 +21,7 @@ use toml::{
 use crate::{
     constants::{CRMRC, CRMRC_FILE, DL, PUBLIC_RC, REGISTRY, SOURCE},
     description::RegistryDescription,
-    util::home_dir,
+    util::{append_end_spaces, home_dir},
 };
 
 /// 运行时配置
@@ -67,13 +67,14 @@ impl RuntimeConfig {
 
     /// 将运行时配置中的镜像列表转换为字符串
     pub fn to_string(&self, mut sep: Option<&str>) -> String {
-        let sep = if let None = sep { " = " } else { sep.unwrap() };
+        let sep = if let None = sep { "" } else { sep.unwrap() };
 
         self.default
             .iter()
             .chain(self.extend.iter())
             .fold(String::new(), |mut memo, (k, v)| {
-                memo.push_str(&format! {"{}{}{}\n", k, sep, v.registry });
+                let s = append_end_spaces(k, None);
+                memo.push_str(&format! {"{}{}{}\n", s, sep, v.registry });
                 memo
             })
             .trim_end()
