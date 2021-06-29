@@ -62,7 +62,7 @@ pub fn is_registry_dl(dl: Option<&String>) -> &str {
 
 pub fn not_command(command: &str) {
     let r = r#"
-  crm best                    评估网络延迟并使用最优的镜像
+  crm best                    评估网络延迟并自动切换到最优的镜像
   crm current                 获取当前所使用的镜像
   crm default                 恢复为默认的镜像
   crm list                    从镜像配置文件中获取镜像列表
