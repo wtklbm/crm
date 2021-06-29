@@ -9,7 +9,7 @@ use crate::{
     cargo::CargoConfig,
     constants::{APP_NAME, APP_VERSION, RUST_LANG},
     runtime::RuntimeConfig,
-    util::{is_registry_addr, is_registry_dl, is_registry_name},
+    util::{append_end_spaces, is_registry_addr, is_registry_dl, is_registry_name},
 };
 
 /// 镜像对象
@@ -80,7 +80,7 @@ impl Registry {
 
     /// 获取镜像列表
     pub fn list(&self) -> String {
-        self.rc.to_string(Some(": "))
+        self.rc.to_string(Some("- "))
     }
 
     /// 获取当前正在使用的镜像
@@ -178,16 +178,12 @@ impl Registry {
             .test_status(name)
             .iter()
             .map(|(name, status)| {
-                let pad = if name.len() < 15 {
-                    " ".repeat(15 - name.len())
-                } else {
-                    "".to_string()
-                };
+                let new_name = append_end_spaces(name, None);
 
                 if let None = status {
-                    format!("{}{} -- failed", name, pad)
+                    format!("{} -- failed", new_name)
                 } else {
-                    format!("{}{} -- {} ms", name, pad, status.unwrap())
+                    format!("{} -- {} ms", new_name, status.unwrap())
                 }
             })
             .collect();
