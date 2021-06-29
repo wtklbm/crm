@@ -13,6 +13,7 @@ use toml::{
 
 use crate::{
     constants::{CRATES_IO, REGISTRY, REPLACE_WITH, RUST_LANG, SOURCE},
+    description::RegistryDescription,
     util::{cargo_config_path, get_cargo_config},
 };
 
@@ -193,9 +194,9 @@ impl CargoConfig {
     pub fn use_registry(
         &mut self,
         registry_name: &str,
-        registry_addr: Option<&String>,
+        registry_description: Option<&RegistryDescription>,
     ) -> Result<(), String> {
-        if registry_addr.is_none() {
+        if registry_description.is_none() {
             return Err(registry_name.to_string());
         }
 
@@ -205,7 +206,10 @@ impl CargoConfig {
             return Ok(());
         }
 
-        self.append_registry(registry_name, registry_addr.unwrap().to_string());
+        self.append_registry(
+            registry_name,
+            registry_description.unwrap().registry.to_string(),
+        );
 
         Ok(())
     }
