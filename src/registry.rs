@@ -181,9 +181,9 @@ impl Registry {
                 let new_name = append_end_spaces(name, None);
 
                 if let None = status {
-                    format!("{} -- failed", new_name)
+                    format!("  {} -- failed", new_name)
                 } else {
-                    format!("{} -- {} ms", new_name, status.unwrap())
+                    format!("  {} -- {} ms", new_name, status.unwrap())
                 }
             })
             .collect();
