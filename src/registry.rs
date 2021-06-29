@@ -7,7 +7,7 @@ use std::{process, time::SystemTime};
 
 use crate::{
     cargo::CargoConfig,
-    constants::RUST_LANG,
+    constants::{APP_NAME, APP_VERSION, RUST_LANG},
     runtime::RuntimeConfig,
     util::{is_registry_addr, is_registry_dl, is_registry_name},
 };
@@ -16,6 +16,7 @@ use crate::{
 pub struct Registry {
     /// 运行时配置
     rc: RuntimeConfig,
+
     /// `Cargo` 配置
     cargo: CargoConfig,
 }
@@ -114,15 +115,13 @@ impl Registry {
     fn test_by_name(&self, name: &str) -> (String, Option<u128>) {
         if let Some(rd) = self.rc.get(name) {
             let dl = rd.dl.clone();
-            let crate_name = "crm";
-            let version = "0.0.1";
 
             // 拼接链接地址
             let url = if !dl.ends_with("/api/v1/crates") {
-                dl.replace("{crate}", crate_name)
-                    .replace("{version}", version)
+                dl.replace("{crate}", APP_NAME)
+                    .replace("{version}", APP_VERSION)
             } else {
-                format!("{}/{}/{}/download", dl, crate_name, version)
+                format!("{}/{}/{}/download", dl, APP_NAME, APP_VERSION)
             };
 
             // 当前系统的时间
