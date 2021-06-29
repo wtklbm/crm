@@ -74,7 +74,7 @@ impl RuntimeConfig {
             .chain(self.extend.iter())
             .fold(String::new(), |mut memo, (k, v)| {
                 let s = append_end_spaces(k, None);
-                memo.push_str(&format! {"{}{}{}\n", s, sep, v.registry });
+                memo.push_str(&format! {"  {}{}{}\n", s, sep, v.registry });
                 memo
             })
             .trim_end()
