@@ -56,6 +56,15 @@ impl RuntimeConfig {
         }
     }
 
+    /// 获取所有的镜像名 `Vec`
+    pub fn registry_names(&self) -> Vec<String> {
+        self.default
+            .iter()
+            .chain(self.extend.iter())
+            .map(|(k, _)| k.to_string())
+            .collect()
+    }
+
     /// 将运行时配置中的镜像列表转换为字符串
     pub fn to_string(&self, mut sep: Option<&str>) -> String {
         let sep = if let None = sep { " = " } else { sep.unwrap() };
@@ -67,6 +76,8 @@ impl RuntimeConfig {
                 memo.push_str(&format! {"{}{}{}\n", k, sep, v.registry });
                 memo
             })
+            .trim_end()
+            .to_string()
     }
 
     /// 将运行时配置中的镜像列表名转换为字符串
