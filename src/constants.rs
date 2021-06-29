@@ -32,26 +32,39 @@ pub const CARGO: &str = ".cargo";
 /// `${CARGO_HOME}/.cargo` 目录下的 `config` 文件
 pub const CONFIG: &str = "config";
 
-/// `.crmrc` 配置文件的内容
+pub const DL: &str = "dl";
+
+/// 默认镜像内容
 pub const CRMRC_FILE: &str = r#"
-# Grammar description:
-# registry_name = registry_addr
+# `crm` 配置
 
 # 官方源
-rust-lang = https://github.com/rust-lang/crates.io-index
+[source.rust-lang]
+registry = "https://github.com/rust-lang/crates.io-index"
+dl = "https://crates.io/api/v1/crates"
 
 # `rustcc` 社区
-rustcc = git://crates.rustcc.cn/crates.io-index
+[source.rustcc]
+registry = "git://crates.rustcc.cn/crates.io-index"
+dl = "https://crates.rustcc.cn/api/v1/crates"
 
 # 上海交通大学
-sjtu = https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index
+[source.sjtu]
+registry = "https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index"
+dl = "https://mirror.sjtu.edu.cn/crates.io/crates/{crate}/{crate}-{version}.crate"
 
 # 清华大学
-tuna = https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git
+[source.tuna]
+registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"
+dl = "https://crates.io/api/v1/crates"
 
 # 中科大
-ustc = git://mirrors.ustc.edu.cn/crates.io-index
+[source.ustc]
+registry = "git://mirrors.ustc.edu.cn/crates.io-index"
+dl = "https://crates-io.proxy.ustclug.org/api/v1/crates"
 
 # 字节跳动
-rsproxy = https://rsproxy.cn/crates.io-index
+[source.rsproxy]
+registry = "https://rsproxy.cn/crates.io-index"
+dl = "https://rsproxy.cn/api/v1/crates"
 "#;
