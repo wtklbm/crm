@@ -59,11 +59,17 @@ pub fn handle_command((command, args): Args) {
         // 恢复默认镜像
         "default" => r.default(),
 
+        // 评估网络延迟并使用最优的镜像
+        "best" => r.best(),
+
         // 切换镜像
         "use" => r.select(args.get(0)),
 
         // 删除镜像
         "remove" => r.remove(args.get(0)),
+
+        // 对镜像源网络延迟进行评估
+        "test" => r.test(args.get(0)),
 
         // 获取当前镜像
         "current" => {
