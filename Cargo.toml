@@ -7,7 +7,7 @@ homepage = "https://github.com/wtklbm/crm"
 repository = "https://github.com/wtklbm/crm.git"
 edition = "2018"
 license = "MIT OR Apache-2.0"
-keywords = ["cargo", "crates.io", "registry"]
+keywords = ["cargo", "registry"]
 exclude = [".vscode/**"]
 
 [profile.release]
