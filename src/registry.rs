@@ -139,12 +139,9 @@ impl Registry {
 
                 return (name.to_string(), Some(millis));
             }
-
-            // 请求失败
-            return (name.to_string(), None);
         }
 
-        return (name.to_string(), None);
+        (name.to_string(), None)
     }
 
     /// 测试镜像源状态
