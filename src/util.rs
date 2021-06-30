@@ -6,6 +6,8 @@
 
 use std::{env, fs::read_to_string, path::PathBuf, process};
 
+use mrq::Status;
+
 use crate::constants::{CARGO, CARGO_HOME, CONFIG};
 
 pub fn home_dir() -> PathBuf {
@@ -74,6 +76,18 @@ pub fn append_end_spaces(value: &str, total_len: Option<usize>) -> String {
     };
 
     format!("{}{}", value, pad)
+}
+
+pub fn request(url: &String) -> bool {
+    if let Ok(response) = mrq::get(url).with_timeout(10).send() {
+        return match &response.status {
+            Status::Success(_) => true,
+            Status::Redirect(_) => request(&response.headers["location"]),
+            _ => false,
+        };
+    }
+
+    false
 }
 
 pub fn not_command(command: &str) {
