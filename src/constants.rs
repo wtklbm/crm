@@ -39,7 +39,7 @@ pub const DL: &str = "dl";
 pub const APP_NAME:&str = "crm";
 
 /// 应用程序版本号
-pub const APP_VERSION: &str = "0.1.1";
+pub const APP_VERSION: &str = "0.1.2";
 
 /// 默认镜像内容
 pub const CRMRC_FILE: &str = r#"
