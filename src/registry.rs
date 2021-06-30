@@ -2,14 +2,13 @@
 //!
 //! 该模块用于操作镜像。包括简单的增删改查操作。
 
-use mrq::Status;
 use std::{process, time::SystemTime};
 
 use crate::{
     cargo::CargoConfig,
     constants::{APP_NAME, APP_VERSION, RUST_LANG},
     runtime::RuntimeConfig,
-    util::{append_end_spaces, is_registry_addr, is_registry_dl, is_registry_name},
+    util::{append_end_spaces, is_registry_addr, is_registry_dl, is_registry_name, request},
 };
 
 /// 镜像对象
@@ -130,20 +129,19 @@ impl Registry {
                 format!("{}/{}/{}/download", dl, APP_NAME, APP_VERSION)
             };
 
-            // 当前系统的时间
+            // 获取当前的时间
             let time_now = SystemTime::now();
 
-            if let Ok(response) = mrq::get(url).with_timeout(10).send() {
-                match response.status {
-                    Status::Success(_) | Status::Redirect(_) => {
-                        // 获取当前时间和 `time_now` 之间的时间差
-                        if let Ok(elapsed) = time_now.elapsed() {
-                            return (name.to_string(), Some(elapsed.as_millis()));
-                        }
-                    }
-                    _ => (),
-                };
+            // 发起请求
+            if request(&url) {
+                // 如果请求返回成功计算总延迟
+                let millis = time_now.elapsed().unwrap().as_millis();
+
+                return (name.to_string(), Some(millis));
             }
+
+            // 请求失败
+            return (name.to_string(), None);
         }
 
         return (name.to_string(), None);
