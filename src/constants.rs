@@ -36,10 +36,19 @@ pub const CONFIG: &str = "config";
 pub const DL: &str = "dl";
 
 /// 应用程序名称
-pub const APP_NAME:&str = "crm";
+pub const APP_NAME: &str = "crm";
 
 /// 应用程序版本号
 pub const APP_VERSION: &str = "0.1.2";
+
+/// 配置文件所在路径
+pub const CARGO_CONFIG_PATH: &str = "$CARGO_HOME/.cargo/config";
+
+/// 表
+pub const BIAO: &str = "表";
+
+/// 字符串
+pub const ZI_FU_CHUAN: &str = "字符串";
 
 /// 默认镜像内容
 pub const CRMRC_FILE: &str = r#"
