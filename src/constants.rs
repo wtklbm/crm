@@ -36,10 +36,10 @@ pub const CONFIG: &str = "config";
 pub const DL: &str = "dl";
 
 /// 应用程序名称
-pub const APP_NAME: &str = "crm";
+pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
 
 /// 应用程序版本号
-pub const APP_VERSION: &str = "0.1.3";
+pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// 配置文件所在路径
 pub const CARGO_CONFIG_PATH: &str = "$CARGO_HOME/.cargo/config";
