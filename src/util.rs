@@ -4,9 +4,7 @@
 
 #![allow(deprecated)]
 
-use std::{env, fs::read_to_string, path::PathBuf, process};
-
-use mrq::Status;
+use std::{env, fs::read_to_string, path::PathBuf, process, time::Duration};
 
 use crate::constants::{CARGO, CARGO_CONFIG_PATH, CARGO_HOME, CONFIG};
 
@@ -79,12 +77,23 @@ pub fn append_end_spaces(value: &str, total_len: Option<usize>) -> String {
 }
 
 pub fn request(url: &String) -> bool {
-    if let Ok(response) = mrq::get(url).with_timeout(10).send() {
-        return match &response.status {
-            Status::Success(_) => true,
-            Status::Redirect(_) => request(&response.headers["location"]),
-            _ => false,
-        };
+    let time = Duration::from_secs(10);
+
+    if let Ok(response) = ureq::get(url).timeout(time).call() {
+        let status = response.status();
+
+        if status >= 400 {
+            return false;
+        }
+
+        if status >= 300 {
+            return match response.header("location") {
+                Some(v) => request(&v.to_string()),
+                None => false,
+            };
+        }
+
+        return true;
     }
 
     false
