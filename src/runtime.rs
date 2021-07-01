@@ -3,24 +3,14 @@
 //! `runtime` 是一个处理程序运行时配置的模块，通过它，我们可以通过执行的命令来更改 `.crmrc` 文件。
 //! 而 `.crmrc` 文件里面存储的是关于 `Cargo` 配置的相关信息。
 
-#![allow(unused)]
+use std::{collections::HashMap, fs::read_to_string, path::PathBuf, process};
 
-use std::{
-    collections::HashMap,
-    fs::{self, read_to_string, write},
-    path::PathBuf,
-    process,
-};
-
-use toml::{
-    self,
-    map::Map,
-    Value::{self, String as VString, Table},
-};
+use toml_edit::{table, value};
 
 use crate::{
-    constants::{CRMRC, CRMRC_FILE, DL, PUBLIC_RC, REGISTRY, SOURCE},
+    constants::{BIAO, CRMRC, CRMRC_FILE, DL, REGISTRY, SOURCE},
     description::RegistryDescription,
+    toml::Toml,
     util::{append_end_spaces, home_dir},
 };
 
@@ -29,6 +19,9 @@ use crate::{
 pub struct RuntimeConfig {
     /// 运行时配置的存放路径
     path: PathBuf,
+
+    /// 用户自定义的配置
+    config: Toml,
 
     /// 用户自定义镜像的映射表
     extend: HashMap<String, RegistryDescription>,
@@ -49,10 +42,14 @@ impl RuntimeConfig {
             Err(_) => String::new(),
         };
 
+        let extend = RuntimeConfig::get_config(&data);
+        let default = RuntimeConfig::get_config(&CRMRC_FILE.to_string());
+
         RuntimeConfig {
+            extend: RuntimeConfig::to_map(&extend),
+            default: RuntimeConfig::to_map(&default),
             path: rc_path,
-            extend: RuntimeConfig::deserialize_map(data),
-            default: RuntimeConfig::deserialize_map(CRMRC_FILE.to_string()),
+            config: extend,
         }
     }
 
@@ -66,7 +63,7 @@ impl RuntimeConfig {
     }
 
     /// 将运行时配置中的镜像列表转换为字符串
-    pub fn to_string(&self, mut sep: Option<&str>) -> String {
+    pub fn to_string(&self, sep: Option<&str>) -> String {
         let sep = if let None = sep { "" } else { sep.unwrap() };
 
         self.default
@@ -91,9 +88,9 @@ impl RuntimeConfig {
     }
 
     /// 将运行时配置写入到文件中
-    pub fn write(&self) {
-        let data = RuntimeConfig::serialize_map(&self.extend);
-        fs::write(&self.path, data).unwrap();
+    pub fn write(&mut self) {
+        self.from_map();
+        self.config.write(&self.path);
     }
 
     /// 获取运行时配置中的某一个属性
@@ -130,56 +127,68 @@ impl RuntimeConfig {
         self.extend.remove(registry_name);
     }
 
-    /// 反序列化 `HashMap`
-    fn deserialize_map(data: String) -> HashMap<String, RegistryDescription> {
-        let mut config = toml::from_str::<Value>(&data);
+    fn get_config(data: &String) -> Toml {
+        let config = Toml::parse(&data);
 
         if let Err(_) = config {
-            eprint!("解析运行时配置失败，请手动删除 ~/.crmrc 文件后重试");
+            eprint!("解析 ~/.crmrc 文件失败，请修改/删除后重试");
             process::exit(-1);
         }
 
         let mut config = config.unwrap();
+        let data = config.table_mut();
+        let source = &data[SOURCE];
 
-        // 如果配置文件中的 `source` 属性不是 `Table`，则创建一个空的 `Table` 赋值给 `source`。
-        if config.get(SOURCE).is_none() || !config.get(SOURCE).unwrap().is_table() {
-            config
-                .as_table_mut()
-                .unwrap()
-                .entry(SOURCE)
-                .or_insert(Table(Map::new()));
+        // 如果没有则创建表，否则判断是不是表
+        if source.is_none() {
+            data[SOURCE] = table();
+        } else if !source.is_table() {
+            eprint!(
+                "~/.crmrc 文件中的 {} 字段不是一个{}，请修改后重试",
+                SOURCE, BIAO
+            );
+            process::exit(-1);
         }
 
+        config
+    }
+
+    /// 从配置转换为 `HashMap`
+    fn to_map(config: &Toml) -> HashMap<String, RegistryDescription> {
+        let data = config.table();
+        let source = data[SOURCE].as_table().unwrap();
         let mut map = HashMap::new();
 
-        // NOTE: 除了 `source` 属性之外，其他属性将被忽略
-        // 即使在 `.crmrc` 中有其他属性，在写入到配置文件时也会被自动删除
-        let source_table = config.get_mut(SOURCE).unwrap().as_table().unwrap();
+        source
+            .iter()
+            .for_each(|(key, value)| match value.as_table() {
+                Some(v) => {
+                    let registry = v[REGISTRY].as_str().unwrap().to_string();
+                    let dl = v[DL].as_str().unwrap().to_string();
 
-        source_table.iter().for_each(|(key, value)| {
-            let table = value.as_table().unwrap();
-            let registry = table.get(REGISTRY).unwrap().as_str().unwrap().to_string();
-            let dl = table.get(DL).unwrap().as_str().unwrap().to_string();
-
-            map.insert(key.to_owned(), RegistryDescription::new(registry, dl));
-        });
+                    map.insert(key.to_string(), RegistryDescription::new(registry, dl));
+                }
+                None => {
+                    eprint!("~/.crmrc 文件中的{}不是一个{}, 请修改后重试", key, BIAO);
+                    process::exit(-1);
+                }
+            });
 
         map
     }
 
-    /// 序列化 `HashMap`
-    fn serialize_map(data: &HashMap<String, RegistryDescription>) -> String {
-        let mut sorted_keys = data.keys().collect::<Vec<&String>>();
-        sorted_keys.sort_by(|a, b| a.cmp(b));
+    /// 从 `HashMap` 转换为配置
+    fn from_map(&mut self) {
+        let config = self.config.table_mut();
+        config[SOURCE] = table();
+        let source = config[SOURCE].as_table_mut().unwrap();
 
-        let data = sorted_keys.iter().fold(String::new(), |mut memo, k| {
-            let v = data.get(*k).unwrap();
-            memo.push_str(
-                &format! {"[source.{}]\nregistry = \"{}\"\ndl = \"{}\"\n\n", k, v.registry, v.dl },
-            );
-            memo
+        self.extend.iter().for_each(|(k, v)| {
+            let RegistryDescription { registry, dl } = v;
+
+            source[k] = table();
+            source[k][REGISTRY] = value(registry.to_string());
+            source[k][DL] = value(dl.to_string());
         });
-
-        data.trim().to_string()
     }
 }
