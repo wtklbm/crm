@@ -9,7 +9,8 @@ use toml_edit::{table, value};
 
 use crate::{
     constants::{
-        BIAO, CARGO_CONFIG_PATH, CRATES_IO, REGISTRY, REPLACE_WITH, RUST_LANG, SOURCE, ZI_FU_CHUAN,
+        BIAO, CARGO_CONFIG_PATH, CRATES_IO, PLEASE_TRY, REGISTRY, REPLACE_WITH, RUST_LANG, SOURCE,
+        ZI_FU_CHUAN,
     },
     description::RegistryDescription,
     toml::Toml,
@@ -50,7 +51,7 @@ impl CargoConfig {
                 CargoConfig { data: config }
             }
             Err(_) => {
-                eprint!("{} 文件解析失败，请修改后重试", CARGO_CONFIG_PATH);
+                eprint!("{} 文件解析失败，{}", CARGO_CONFIG_PATH, PLEASE_TRY);
                 process::exit(-1);
             }
         }
