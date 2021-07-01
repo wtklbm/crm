@@ -39,7 +39,7 @@ pub const DL: &str = "dl";
 pub const APP_NAME: &str = "crm";
 
 /// 应用程序版本号
-pub const APP_VERSION: &str = "0.1.2";
+pub const APP_VERSION: &str = "0.1.3";
 
 /// 配置文件所在路径
 pub const CARGO_CONFIG_PATH: &str = "$CARGO_HOME/.cargo/config";
