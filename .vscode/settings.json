@@ -7,6 +7,7 @@
         "rsproxy",
         "rustcc",
         "sjtu",
+        "ureq",
         "ustc"
     ]
 }
