@@ -20,8 +20,8 @@ pub const RUST_LANG: &str = "rust-lang";
 /// `${HOME}` 目录下的 `.crmrc` 文件的文件名
 pub const CRMRC: &str = ".crmrc";
 
-/// 程序根目录的 `.crmrc` 文件路径
-pub const PUBLIC_RC: &str = "public/.crmrc";
+/// `${HOME}` 目录下的 `.crmrc` 文件的文件路径
+pub const CRMRC_PATH: &str = "~/.crmrc";
 
 /// 用户查找 `"CARGO_HOME"` 环境变量
 pub const CARGO_HOME: &str = "CARGO_HOME";
@@ -49,6 +49,9 @@ pub const BIAO: &str = "表";
 
 /// 字符串
 pub const ZI_FU_CHUAN: &str = "字符串";
+
+/// 请修改/删除后重试
+pub const PLEASE_TRY: &str = "请修改/删除后重试";
 
 /// 默认镜像内容
 pub const CRMRC_FILE: &str = r#"
