@@ -8,7 +8,7 @@ use std::{collections::HashMap, fs::read_to_string, path::PathBuf, process};
 use toml_edit::{table, value};
 
 use crate::{
-    constants::{BIAO, CRMRC, CRMRC_FILE, DL, REGISTRY, SOURCE},
+    constants::{BIAO, CRMRC, CRMRC_FILE, CRMRC_PATH, DL, PLEASE_TRY, REGISTRY, SOURCE},
     description::RegistryDescription,
     toml::Toml,
     util::{append_end_spaces, home_dir},
@@ -131,7 +131,7 @@ impl RuntimeConfig {
         let config = Toml::parse(&data);
 
         if let Err(_) = config {
-            eprint!("解析 ~/.crmrc 文件失败，请修改/删除后重试");
+            eprint!("解析{}文件失败，{}", CRMRC_PATH, PLEASE_TRY);
             process::exit(-1);
         }
 
@@ -144,8 +144,8 @@ impl RuntimeConfig {
             data[SOURCE] = table();
         } else if !source.is_table() {
             eprint!(
-                "~/.crmrc 文件中的 {} 字段不是一个{}，请修改后重试",
-                SOURCE, BIAO
+                "{}文件中的{}不是一个{}，{}",
+                CRMRC_PATH, SOURCE, BIAO, PLEASE_TRY
             );
             process::exit(-1);
         }
@@ -163,13 +163,27 @@ impl RuntimeConfig {
             .iter()
             .for_each(|(key, value)| match value.as_table() {
                 Some(v) => {
-                    let registry = v[REGISTRY].as_str().unwrap().to_string();
-                    let dl = v[DL].as_str().unwrap().to_string();
+                    let r = v[REGISTRY].as_str();
+                    let d = v[DL].as_str();
+
+                    if r.is_none() || d.is_none() {
+                        eprint!(
+                            "{}文件中的{}中的值不是预期的, {}",
+                            CRMRC_PATH, SOURCE, PLEASE_TRY
+                        );
+                        process::exit(-1);
+                    }
+
+                    let registry = r.unwrap().to_string();
+                    let dl = d.unwrap().to_string();
 
                     map.insert(key.to_string(), RegistryDescription::new(registry, dl));
                 }
                 None => {
-                    eprint!("~/.crmrc 文件中的{}不是一个{}, 请修改后重试", key, BIAO);
+                    eprint!(
+                        "{}文件中的{}不是一个{}, {}",
+                        CRMRC_PATH, key, BIAO, PLEASE_TRY
+                    );
                     process::exit(-1);
                 }
             });
