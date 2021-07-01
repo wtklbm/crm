@@ -8,7 +8,9 @@ use crate::{
     cargo::CargoConfig,
     constants::{APP_NAME, APP_VERSION, RUST_LANG},
     runtime::RuntimeConfig,
-    util::{append_end_spaces, is_registry_addr, is_registry_dl, is_registry_name, request},
+    util::{
+        append_end_spaces, error_print, is_registry_addr, is_registry_dl, is_registry_name, request,
+    },
 };
 
 /// 镜像对象
@@ -37,13 +39,16 @@ impl Registry {
             let keys = self.rc.to_key_string();
 
             if keys.is_empty() {
-                return println!(
-                    "没有找到 \"{}\" 镜像，配置中的镜像列表为空，请用 \"crm add\" 添加镜像后重试",
-                    name
-                );
+                return error_print(format!(
+                    "没有找到 {} 镜像，配置中的镜像列表为空，请用 \"crm save\" 添加镜像后重试",
+                    name,
+                ));
             }
 
-            println!("没有找到 \"{}\" 镜像，可选的镜像是:\n{}", name, keys);
+            error_print(format!(
+                "没有找到 {} 镜像，可选的镜像是:\n{}",
+                name, keys
+            ));
         };
 
         self.cargo.make();
@@ -54,12 +59,12 @@ impl Registry {
         let name = is_registry_name(name).trim();
 
         if let Some(_) = self.rc.get_default(name) {
-            println!("请不要删除内置镜像");
+            error_print("请不要删除内置镜像");
             process::exit(-1);
         }
 
         if let None = self.rc.get_extend(name) {
-            println!("删除失败，{:?} 镜像不存在", name);
+            error_print(format!("删除失败，{:?} 镜像不存在", name));
             process::exit(-1);
         }
 
@@ -107,7 +112,7 @@ impl Registry {
         let found = tested.iter().find(|v| v.1.is_some());
 
         if found.is_none() {
-            return println!("没有可切换的镜像源");
+            return error_print("没有可切换的镜像源");
         }
 
         let registry_name = &found.unwrap().0;
