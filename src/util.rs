@@ -4,7 +4,7 @@
 
 #![allow(deprecated)]
 
-use std::{env, fs::read_to_string, path::PathBuf, process, time::Duration};
+use std::{env, fmt::Display, fs::read_to_string, path::PathBuf, process, time::Duration};
 
 use crate::constants::{CARGO, CARGO_CONFIG_PATH, CARGO_HOME, CONFIG};
 
@@ -35,8 +35,8 @@ pub fn get_cargo_config() -> String {
 
 pub fn is_registry_name(name: Option<&String>) -> &str {
     if name.is_none() {
-        println!("请输入正确的镜像名");
-        process::exit(0);
+        error_print("请输入正确的镜像名");
+        process::exit(-1);
     }
 
     name.unwrap().as_str()
@@ -44,8 +44,8 @@ pub fn is_registry_name(name: Option<&String>) -> &str {
 
 pub fn is_registry_addr(addr: Option<&String>) -> &str {
     if addr.is_none() {
-        println!("请输入正确的镜像地址");
-        process::exit(0);
+        error_print("请输入正确的镜像地址");
+        process::exit(-1);
     }
 
     addr.unwrap().as_str()
@@ -53,8 +53,8 @@ pub fn is_registry_addr(addr: Option<&String>) -> &str {
 
 pub fn is_registry_dl(dl: Option<&String>) -> &str {
     if dl.is_none() {
-        println!("请输入正确的 dl。\n  每一个镜像源都是一个 Git 存储库，而在该存储库的根目录下有一个 config.json 文件，\n  其中，dl 属性是 config.json 文件中的一个字段。");
-        process::exit(0);
+        error_print("请输入正确的 dl。\n  每一个镜像源都是一个 Git 存储库，而在该存储库的根目录下有一个 config.json 文件，\n  其中，dl 属性是 config.json 文件中的一个字段。");
+        process::exit(-1);
     }
 
     dl.unwrap().as_str()
@@ -100,10 +100,14 @@ pub fn request(url: &String) -> bool {
 }
 
 pub fn field_eprint(field_name: &str, field_type: &str) {
-    eprint!(
+    error_print(format!(
         "{} 文件中的 {} 字段不是一个{}，请修改后重试",
         CARGO_CONFIG_PATH, field_name, field_type
-    );
+    ));
+}
+
+pub fn error_print<T: Display>(message: T) {
+    eprint!(" {}", message);
 }
 
 pub fn not_command(command: &str) {
@@ -117,6 +121,7 @@ pub fn not_command(command: &str) {
   crm test [name]             下载测试包以评估网络延迟
   crm use <name>              切换为要使用的镜像
 "#;
-    println!("{} 命令无效。参考:\n{}", command, r.trim_end());
-    process::exit(0);
+
+    error_print(format!("{} 命令无效。参考:\n{}", command, r.trim_end()));
+    process::exit(-1);
 }
