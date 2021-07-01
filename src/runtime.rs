@@ -144,7 +144,7 @@ impl RuntimeConfig {
             data[SOURCE] = table();
         } else if !source.is_table() {
             eprint!(
-                "{}文件中的{}不是一个{}，{}",
+                "{}文件中的{}字段不是一个{}，{}",
                 CRMRC_PATH, SOURCE, BIAO, PLEASE_TRY
             );
             process::exit(-1);
@@ -168,8 +168,8 @@ impl RuntimeConfig {
 
                     if r.is_none() || d.is_none() {
                         eprint!(
-                            "{}文件中的{}中的值不是预期的, {}",
-                            CRMRC_PATH, SOURCE, PLEASE_TRY
+                            "{}文件中的 [{}.{}] 里没有包含{}或{}字段, {}",
+                            CRMRC_PATH, SOURCE, key, REGISTRY, DL, PLEASE_TRY
                         );
                         process::exit(-1);
                     }
@@ -181,7 +181,7 @@ impl RuntimeConfig {
                 }
                 None => {
                     eprint!(
-                        "{}文件中的{}不是一个{}, {}",
+                        "{}文件中的{}字段不是一个{}, {}",
                         CRMRC_PATH, key, BIAO, PLEASE_TRY
                     );
                     process::exit(-1);
