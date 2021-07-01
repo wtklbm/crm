@@ -3,24 +3,23 @@
 //! 该模块会解析 `Cargo` 配置，并将其反序列化为对象的形式，修改完成后再序列化为相应的文件。
 //! `CargoConfig` 是一个操作 `Cargo` 配置文件的对象，有了它一切都好办了。
 
-use std::{cell::RefCell, fs};
+use std::process;
 
-use toml::{
-    self,
-    map::Map,
-    Value::{self, String as VString, Table},
-};
+use toml_edit::{table, value};
 
 use crate::{
-    constants::{CRATES_IO, REGISTRY, REPLACE_WITH, RUST_LANG, SOURCE},
+    constants::{
+        BIAO, CARGO_CONFIG_PATH, CRATES_IO, REGISTRY, REPLACE_WITH, RUST_LANG, SOURCE, ZI_FU_CHUAN,
+    },
     description::RegistryDescription,
-    util::{cargo_config_path, get_cargo_config},
+    toml::Toml,
+    util::{cargo_config_path, field_eprint, get_cargo_config},
 };
 
 /// `Cargo` 配置对象
 pub struct CargoConfig {
     /// 配置对象中的数据，它是一个经过反序列化的对象
-    data: RefCell<Value>,
+    data: Toml,
 }
 
 impl CargoConfig {
@@ -30,165 +29,113 @@ impl CargoConfig {
 
         // 如果文件是空的
         if toml.trim().is_empty() {
-            let mut m = Map::new();
-            m.insert(SOURCE.to_string(), Table(Map::new()));
-
             return CargoConfig {
-                data: RefCell::new(Table(m)),
+                data: Toml::parse("[source]").unwrap(),
             };
         }
 
-        let mut config = toml::from_str::<Value>(&toml).unwrap();
+        match Toml::parse(&toml) {
+            Ok(mut config) => {
+                let data = config.table_mut();
+                let source = &data[SOURCE];
 
-        // 如果配置文件中的 `source` 属性不是 `Table`，则创建一个空的 `Table` 赋值给 `source`。
-        if config.get(SOURCE).is_none() || !config.get(SOURCE).unwrap().is_table() {
-            config
-                .as_table_mut()
-                .unwrap()
-                .entry(SOURCE)
-                .or_insert(Table(Map::new()));
-        }
+                // 如果没有则创建表，否则判断是不是表
+                if source.is_none() {
+                    data[SOURCE] = table();
+                } else if !source.is_table() {
+                    field_eprint(SOURCE, BIAO);
+                    process::exit(-1);
+                }
 
-        CargoConfig {
-            data: RefCell::new(config),
+                CargoConfig { data: config }
+            }
+            Err(_) => {
+                eprint!("{} 文件解析失败，请修改后重试", CARGO_CONFIG_PATH);
+                process::exit(-1);
+            }
         }
     }
 
     /// 将 `Cargo` 配置写入到文件中
     pub fn make(&self) {
-        let data = self.data.borrow();
-        let file_content = toml::to_string(&(*data)).unwrap();
-
-        fs::write(cargo_config_path(), file_content).unwrap();
+        self.data.write(cargo_config_path())
     }
 
     /// 如果 `Cargo` 配置文件中不包含 `[source.crates-io]` 属性，则为 `Cargo` 配置自动填充。
-    fn fill_crates_io(&self) {
-        if self
-            .data
-            .borrow()
-            .get(SOURCE)
-            .unwrap()
-            .get(CRATES_IO)
-            .is_none()
-        {
-            self.data
-                .borrow_mut()
-                .get_mut(SOURCE)
-                .unwrap()
-                .as_table_mut()
-                .unwrap()
-                .entry(CRATES_IO)
-                .or_insert(Table(Map::new()));
+    fn fill_crates_io(&mut self) {
+        let data = self.data.table_mut();
+        let crates_io = &data[SOURCE][CRATES_IO];
+
+        if crates_io.is_none() {
+            data[SOURCE][CRATES_IO] = table();
+        } else if !crates_io.is_table() {
+            field_eprint(CRATES_IO, BIAO);
+            process::exit(-1);
         }
     }
 
     /// 如果切换为默认镜像时，则删除 `replace_with` 属性。否则，
     /// 则为 `[source.creates-io]` 添加 `replace-with` 属性，
     /// 该属性用于指示要使用的外部镜像的名称。
-    fn replace_with(&self, registry_name: &str) {
+    fn replace_with(&mut self, registry_name: &str) {
         self.fill_crates_io();
 
-        // 去除属性
-        if registry_name.eq(RUST_LANG)
-            && self
-                .data
-                .borrow()
-                .get(SOURCE)
-                .unwrap()
-                .get(CRATES_IO)
-                .is_some()
-        {
-            self.data.borrow_mut().get_mut(SOURCE).unwrap()[CRATES_IO]
-                .as_table_mut()
-                .unwrap()
-                .remove(REPLACE_WITH);
+        let data = self.data.table_mut();
+        let crates_io = &mut data[SOURCE][CRATES_IO];
 
+        // 去除属性
+        if registry_name.eq(RUST_LANG) && !crates_io.is_none() {
+            crates_io.as_table_mut().unwrap().remove(REPLACE_WITH);
             return;
         }
 
         // 追加属性
-        self.data.borrow_mut().get_mut(SOURCE).unwrap()[CRATES_IO]
-            .as_table_mut()
-            .unwrap()
-            .insert(REPLACE_WITH.to_string(), VString(registry_name.to_string()));
+        crates_io[REPLACE_WITH] = value(registry_name);
     }
 
     /// 从 `Cargo` 配置文件中获取正在使用的镜像，其中 `rust-lang` 是 `Cargo` 默认使用的镜像。
-    pub fn current(&self) -> (String, Option<String>) {
-        let mut name = RUST_LANG.to_string();
+    pub fn current(&mut self) -> (String, Option<String>) {
+        let data = self.data.table_mut();
+        let replace_with = &data[SOURCE][CRATES_IO][REPLACE_WITH];
 
         // 从配置文件中获取镜像名
-        if let Some(s) = self.data.borrow_mut().get_mut(SOURCE) {
-            if let Some(i) = s.get(CRATES_IO) {
-                if let Some(r) = i.get(REPLACE_WITH) {
-                    if let VString(str) = r {
-                        name = str.to_string()
-                    }
+        let name = if !replace_with.is_none() {
+            match replace_with.as_str() {
+                Some(name) => name,
+                None => {
+                    field_eprint(REPLACE_WITH, ZI_FU_CHUAN);
+                    process::exit(-1);
                 }
             }
-        }
-
-        // 从配置文件中根据镜像名获取镜像地址
-        let data = self.data.borrow();
-        let source_name = data.get(SOURCE).unwrap().as_table().unwrap().get(&name);
-        let addr = match source_name {
-            Some(value) => Some(
-                value
-                    .as_table()
-                    .unwrap()
-                    .get(REGISTRY)
-                    .unwrap()
-                    .as_str()
-                    .unwrap()
-                    .to_string(),
-            ),
-            None => None,
+        } else {
+            RUST_LANG
         };
 
-        (name, addr)
+        // 从配置文件中根据镜像名获取镜像地址
+        let addr = if let Some(v) = &data[SOURCE][name][REGISTRY].as_str() {
+            Some(v.to_string())
+        } else {
+            None
+        };
+
+        (name.to_string(), addr)
     }
 
     /// 在 `Cargo` 配置文件中添加新的 `[source.xxx]` 镜像属性，并为其指定 `registry` 属性。
     /// `registry` 属性是强制添加的，`${CARGO_HOME}/.cargo/config` 文件中如果存在则会覆盖，
     fn append_registry(&mut self, registry_name: &str, addr: String) {
+        let source = &mut self.data.table_mut()[SOURCE];
+        let registry = &source[registry_name];
+
         // 如果没有 `[source.xxx]` 属性
-        if self
-            .data
-            .borrow_mut()
-            .get_mut(SOURCE)
-            .unwrap()
-            .as_table()
-            .unwrap()
-            .get(registry_name)
-            .is_none()
-        {
-            let mut m = Map::new();
-            m.insert(REGISTRY.to_string(), VString(addr));
-
-            self.data
-                .borrow_mut()
-                .get_mut(SOURCE)
-                .unwrap()
-                .as_table_mut()
-                .unwrap()
-                .insert(registry_name.to_string(), Table(m));
-
-            return;
+        if registry.is_none() {
+            source[registry_name] = table();
+        } else if !registry.is_table() {
+            field_eprint(registry_name, BIAO);
+            process::exit(-1);
         }
 
-        self.data
-            .borrow_mut()
-            .get_mut(SOURCE)
-            .unwrap()
-            .as_table_mut()
-            .unwrap()
-            .get_mut(registry_name)
-            .unwrap()
-            .as_table_mut()
-            .unwrap()
-            // NOTE: 这里不能用 `or_insert()`
-            .insert(REGISTRY.to_string(), VString(addr));
+        source[registry_name][REGISTRY] = value(addr);
     }
 
     /// 根据镜像名删除 `config` 中的旧的镜像属性
@@ -197,24 +144,14 @@ impl CargoConfig {
             return;
         }
 
+        let source = &mut self.data.table_mut()[SOURCE];
+
         // 如果没有 `[source.xxx]` 属性
-        if self
-            .data
-            .borrow_mut()
-            .get_mut(SOURCE)
-            .unwrap()
-            .as_table()
-            .unwrap()
-            .get(registry_name)
-            .is_none()
-        {
+        if source[registry_name].is_none() {
             return;
         }
 
-        self.data
-            .borrow_mut()
-            .get_mut(SOURCE)
-            .unwrap()
+        source
             .as_table_mut()
             .unwrap()
             .remove(registry_name)
