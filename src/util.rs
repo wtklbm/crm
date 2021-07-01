@@ -8,7 +8,7 @@ use std::{env, fs::read_to_string, path::PathBuf, process};
 
 use mrq::Status;
 
-use crate::constants::{CARGO, CARGO_HOME, CONFIG};
+use crate::constants::{CARGO, CARGO_CONFIG_PATH, CARGO_HOME, CONFIG};
 
 pub fn home_dir() -> PathBuf {
     env::home_dir().unwrap()
@@ -31,7 +31,7 @@ pub fn cargo_config_path() -> PathBuf {
 pub fn get_cargo_config() -> String {
     match read_to_string(cargo_config_path()) {
         Ok(content) => content,
-        Err(_) => String::new(),
+        Err(_) => "".to_string(),
     }
 }
 
@@ -88,6 +88,13 @@ pub fn request(url: &String) -> bool {
     }
 
     false
+}
+
+pub fn field_eprint(field_name: &str, field_type: &str) {
+    eprint!(
+        "{} 文件中的 {} 字段不是一个{}，请修改后重试",
+        CARGO_CONFIG_PATH, field_name, field_type
+    );
 }
 
 pub fn not_command(command: &str) {
