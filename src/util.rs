@@ -4,7 +4,16 @@
 
 #![allow(deprecated)]
 
-use std::{env, fmt::Display, fs::read_to_string, path::PathBuf, process, time::Duration};
+use std::{
+    env,
+    fmt::Display,
+    fs::read_to_string,
+    path::PathBuf,
+    process,
+    sync::mpsc,
+    thread,
+    time::{Duration, SystemTime},
+};
 
 use crate::constants::{CARGO, CARGO_CONFIG_PATH, CARGO_HOME, CONFIG};
 
@@ -76,27 +85,57 @@ pub fn append_end_spaces(value: &str, total_len: Option<usize>) -> String {
     format!("{}{}", value, pad)
 }
 
-pub fn request(url: &String) -> bool {
-    let time = Duration::from_secs(10);
+pub fn request(url: &String) -> Option<u128> {
+    let time = SystemTime::now();
 
-    if let Ok(response) = ureq::get(url).timeout(time).call() {
-        let status = response.status();
+    match ureq::get(url).timeout(Duration::from_secs(10)).call() {
+        Ok(res) => {
+            let status = res.status();
 
-        if status >= 400 {
-            return false;
+            if status >= 400 {
+                return None;
+            }
+
+            if status >= 300 {
+                return match res.header("location") {
+                    Some(v) => request(&v.to_string()),
+                    None => None,
+                };
+            }
+
+            Some(time.elapsed().unwrap().as_millis())
         }
+        Err(_) => None,
+    }
+}
 
-        if status >= 300 {
-            return match response.header("location") {
-                Some(v) => request(&v.to_string()),
-                None => false,
+pub fn network_delay(values: Vec<(String, Option<String>)>) -> Vec<(String, Option<u128>)> {
+    let (tx, rx) = mpsc::channel();
+    let iter = values.iter();
+    let len = iter.len();
+    let mut ret = vec![];
+
+    for v in iter {
+        let t = tx.clone();
+        let v = v.clone();
+
+        thread::spawn(move || {
+            let date = match &v.1 {
+                Some(url) => request(url),
+                None => None,
             };
-        }
 
-        return true;
+            t.send((v.0.to_string(), date)).unwrap()
+        });
     }
 
-    false
+    for _ in 0..len {
+        ret.push(rx.recv().unwrap());
+    }
+
+    ret.sort_by(|a, b| a.1.cmp(&b.1));
+
+    ret
 }
 
 pub fn field_eprint(field_name: &str, field_type: &str) {
