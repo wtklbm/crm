@@ -2,14 +2,15 @@
 //!
 //! 该模块用于操作镜像。包括简单的增删改查操作。
 
-use std::{process, time::SystemTime};
+use std::process;
 
 use crate::{
     cargo::CargoConfig,
     constants::{APP_NAME, APP_VERSION, RUST_LANG},
     runtime::RuntimeConfig,
     util::{
-        append_end_spaces, error_print, is_registry_addr, is_registry_dl, is_registry_name, request,
+        append_end_spaces, error_print, is_registry_addr, is_registry_dl, is_registry_name,
+        network_delay,
     },
 };
 
@@ -45,10 +46,7 @@ impl Registry {
                 ));
             }
 
-            error_print(format!(
-                "没有找到 {} 镜像，可选的镜像是:\n{}",
-                name, keys
-            ));
+            error_print(format!("没有找到 {} 镜像，可选的镜像是:\n{}", name, keys));
         };
 
         self.cargo.make();
@@ -64,7 +62,7 @@ impl Registry {
         }
 
         if let None = self.rc.get_extend(name) {
-            error_print(format!("删除失败，{:?} 镜像不存在", name));
+            error_print(format!("删除失败，{} 镜像不存在", name));
             process::exit(-1);
         }
 
@@ -121,54 +119,44 @@ impl Registry {
         println!("已切换到 {} 镜像源", registry_name);
     }
 
-    /// 测试指定的镜像源延迟
-    fn test_by_name(&self, name: &str) -> (String, Option<u128>) {
-        if let Some(rd) = self.rc.get(name) {
-            let dl = rd.dl.clone();
+    /// 将 `dl` 转换为 `url`
+    fn to_url(&self, name: &str) -> Option<String> {
+        match self.rc.get(name) {
+            Some(rd) => {
+                let dl = rd.dl.clone();
+                let url = if !dl.ends_with("/api/v1/crates") {
+                    dl.replace("{crate}", APP_NAME)
+                        .replace("{version}", APP_VERSION)
+                } else {
+                    format!("{}/{}/{}/download", dl, APP_NAME, APP_VERSION)
+                };
 
-            // 拼接链接地址
-            let url = if !dl.ends_with("/api/v1/crates") {
-                dl.replace("{crate}", APP_NAME)
-                    .replace("{version}", APP_VERSION)
-            } else {
-                format!("{}/{}/{}/download", dl, APP_NAME, APP_VERSION)
-            };
-
-            // 获取当前的时间
-            let time_now = SystemTime::now();
-
-            // 发起请求
-            if request(&url) {
-                // 如果请求返回成功计算总延迟
-                let millis = time_now.elapsed().unwrap().as_millis();
-
-                return (name.to_string(), Some(millis));
+                Some(url)
             }
+            None => None,
         }
-
-        (name.to_string(), None)
     }
 
     /// 测试镜像源状态
     fn test_status(&self, name: Option<&String>) -> Vec<(String, Option<u128>)> {
-        let mut status: Vec<(String, Option<u128>)> = Vec::new();
+        let urls = match name {
+            Some(name) => {
+                if self.rc.get(name).is_none() {
+                    error_print(format!("测试失败，{} 镜像不存在", name));
+                    process::exit(-1);
+                }
 
-        // 如果没有传递镜像名
-        if let None = name {
-            // 进行完整性测试
-            self.rc.registry_names().iter().for_each(|name| {
-                status.push(self.test_by_name(name));
-            });
-        } else {
-            // 仅测试当前镜像
-            let name = is_registry_name(name).trim();
-            status.push(self.test_by_name(name));
-        }
+                vec![(name.to_string(), self.to_url(name))]
+            }
+            None => self
+                .rc
+                .registry_names()
+                .iter()
+                .map(|name| (name.to_string(), self.to_url(name)))
+                .collect(),
+        };
 
-        // 对毫秒数进行排序
-        status.sort_by(|a, b| a.1.cmp(&b.1));
-
-        status
+        network_delay(urls)
     }
 
     /// 测试镜像源延迟
