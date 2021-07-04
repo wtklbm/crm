@@ -109,10 +109,16 @@ pub fn request(url: &String) -> Option<u128> {
     }
 }
 
-pub fn network_delay(values: Vec<(String, Option<String>)>) -> Vec<(String, Option<u128>)> {
+pub fn network_delay(
+    values: Vec<(String, Option<String>)>,
+    sender_size: Option<usize>,
+) -> Vec<(String, Option<u128>)> {
     let (tx, rx) = mpsc::channel();
     let iter = values.iter();
-    let len = iter.len();
+    let len = match sender_size {
+        Some(size) => size,
+        None => iter.len(),
+    };
     let mut ret = vec![];
 
     for v in iter {
@@ -125,7 +131,9 @@ pub fn network_delay(values: Vec<(String, Option<String>)>) -> Vec<(String, Opti
                 None => None,
             };
 
-            t.send((v.0.to_string(), date)).unwrap()
+            if let Err(_) = t.send((v.0.to_string(), date)) {
+                process::exit(0);
+            }
         });
     }
 
