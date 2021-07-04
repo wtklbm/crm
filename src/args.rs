@@ -55,7 +55,7 @@ pub fn handle_command((command, args): Args) {
 
     match command.trim().to_lowercase().as_str() {
         // 列出镜像
-        "list" => println!("{}", r.list()),
+        "list" => println!("{}", r.list(&r.current().0)),
 
         // 恢复默认镜像
         "default" => r.default(),
@@ -70,7 +70,7 @@ pub fn handle_command((command, args): Args) {
         "remove" => r.remove(args.get(0)),
 
         // 对镜像源网络延迟进行评估
-        "test" => r.test(args.get(0)),
+        "test" => r.test(&r.current().0, args.get(0)),
 
         // 获取当前镜像
         "current" => {
