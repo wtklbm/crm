@@ -149,6 +149,10 @@ pub fn error_print<T: Display>(message: T) {
     eprint!(" {}", message);
 }
 
+pub fn status_prefix(value1: &String, value2: &String) -> String {
+    if value1.eq(value2) { "  * " } else { "    " }.to_string()
+}
+
 pub fn not_command(command: &str) {
     let r = r#"
   crm best                    评估网络延迟并自动切换到最优的镜像
