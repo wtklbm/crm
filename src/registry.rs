@@ -106,7 +106,7 @@ impl Registry {
 
     /// 评估网络延迟并自动切换到最优的镜像
     pub fn best(&mut self) {
-        let tested = self.test_status(None);
+        let tested = self.test_status(None, Some(1));
         let found = tested.iter().find(|v| v.1.is_some());
 
         if found.is_none() {
@@ -138,7 +138,11 @@ impl Registry {
     }
 
     /// 测试镜像源状态
-    fn test_status(&self, name: Option<&String>) -> Vec<(String, Option<u128>)> {
+    fn test_status(
+        &self,
+        name: Option<&String>,
+        sender_size: Option<usize>
+    ) -> Vec<(String, Option<u128>)> {
         let urls = match name {
             Some(name) => {
                 if self.rc.get(name).is_none() {
@@ -156,14 +160,14 @@ impl Registry {
                 .collect(),
         };
 
-        network_delay(urls)
+        network_delay(urls, sender_size)
     }
 
     /// 测试镜像源延迟
     pub fn test(&self, current: &String, name: Option<&String>) {
         // 拼接状态字符串
         let status: Vec<String> = self
-            .test_status(name)
+            .test_status(name, None)
             .iter()
             .map(|(name, status)| {
                 let prefix = status_prefix(name, current);
