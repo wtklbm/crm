@@ -7,7 +7,12 @@ use std::{collections::HashMap, fs::read_to_string, path::PathBuf, process};
 
 use toml_edit::{table, value};
 
-use crate::{constants::{BIAO, CRMRC, CRMRC_FILE, CRMRC_PATH, DL, PLEASE_TRY, REGISTRY, SOURCE}, description::RegistryDescription, toml::Toml, util::{append_end_spaces, error_print, home_dir}};
+use crate::{
+    constants::{BIAO, CRMRC, CRMRC_FILE, CRMRC_PATH, DL, PLEASE_TRY, REGISTRY, SOURCE},
+    description::RegistryDescription,
+    toml::Toml,
+    util::{append_end_spaces, error_print, home_dir, status_prefix},
+};
 
 /// 运行时配置
 #[derive(Debug)]
@@ -58,15 +63,16 @@ impl RuntimeConfig {
     }
 
     /// 将运行时配置中的镜像列表转换为字符串
-    pub fn to_string(&self, sep: Option<&str>) -> String {
+    pub fn to_string(&self, current: &String, sep: Option<&str>) -> String {
         let sep = if let None = sep { "" } else { sep.unwrap() };
 
         self.default
             .iter()
             .chain(self.extend.iter())
             .fold(String::new(), |mut memo, (k, v)| {
-                let s = append_end_spaces(k, None);
-                memo.push_str(&format! {"  {}{}{}\n", s, sep, v.registry });
+                let p = status_prefix(k, current);
+                let k = append_end_spaces(k, None);
+                memo.push_str(&format! {"{}{}{}{}\n", p, k, sep, v.registry });
                 memo
             })
             .trim_end()
