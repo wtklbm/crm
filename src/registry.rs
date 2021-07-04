@@ -10,7 +10,7 @@ use crate::{
     runtime::RuntimeConfig,
     util::{
         append_end_spaces, error_print, is_registry_addr, is_registry_dl, is_registry_name,
-        network_delay,
+        network_delay, status_prefix,
     },
 };
 
@@ -81,8 +81,8 @@ impl Registry {
     }
 
     /// 获取镜像列表
-    pub fn list(&self) -> String {
-        self.rc.to_string(Some("- "))
+    pub fn list(&self, current: &String) -> String {
+        self.rc.to_string(current, Some("- "))
     }
 
     /// 获取当前正在使用的镜像
@@ -160,19 +160,20 @@ impl Registry {
     }
 
     /// 测试镜像源延迟
-    pub fn test(&self, name: Option<&String>) {
+    pub fn test(&self, current: &String, name: Option<&String>) {
         // 拼接状态字符串
         let status: Vec<String> = self
             .test_status(name)
             .iter()
             .map(|(name, status)| {
-                let new_name = append_end_spaces(name, None);
+                let prefix = status_prefix(name, current);
+                let name = append_end_spaces(name, None);
+                let status = match status {
+                    Some(s) => format!("{} ms", s),
+                    None => "failed".to_string(),
+                };
 
-                if let None = status {
-                    format!("  {} -- failed", new_name)
-                } else {
-                    format!("  {} -- {} ms", new_name, status.unwrap())
-                }
+                format!("{}{} -- {}", prefix, name, status)
             })
             .collect();
 
