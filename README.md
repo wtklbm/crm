@@ -33,6 +33,7 @@ $ crm
   crm current                 获取当前所使用的镜像
   crm default                 恢复为默认的镜像
   crm list                    从镜像配置文件中获取镜像列表
+  crm publish [cwd]           自动切换镜像源并执行 "cargo publish" 命令
   crm remove <name>           在镜像配置文件中删除镜像
   crm save <name> <addr> <dl> 在镜像配置文件中添加/更新镜像
   crm test [name]             下载测试包以评估网络延迟
