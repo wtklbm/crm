@@ -11,7 +11,7 @@ use crate::{
     constants::{BIAO, CRMRC, CRMRC_FILE, CRMRC_PATH, DL, PLEASE_TRY, REGISTRY, SOURCE},
     description::RegistryDescription,
     toml::Toml,
-    util::{append_end_spaces, error_print, home_dir, status_prefix},
+    util::{append_end_spaces, home_dir, status_prefix, to_out},
 };
 
 /// 运行时配置
@@ -132,7 +132,7 @@ impl RuntimeConfig {
         let config = Toml::parse(&data);
 
         if let Err(_) = config {
-            error_print(format!("解析 {} 文件失败，{}", CRMRC_PATH, PLEASE_TRY));
+            to_out(format!("解析 {} 文件失败，{}", CRMRC_PATH, PLEASE_TRY));
             process::exit(-1);
         }
 
@@ -144,7 +144,7 @@ impl RuntimeConfig {
         if source.is_none() {
             data[SOURCE] = table();
         } else if !source.is_table() {
-            error_print(format!(
+            to_out(format!(
                 "{} 文件中的 {} 字段不是一个{}，{}",
                 CRMRC_PATH, SOURCE, BIAO, PLEASE_TRY
             ));
@@ -168,7 +168,7 @@ impl RuntimeConfig {
                     let d = v[DL].as_str();
 
                     if r.is_none() || d.is_none() {
-                        error_print(format!(
+                        to_out(format!(
                             "{} 文件中的 [{}.{}] 里没有包含 {} 或 {} 字段, {}",
                             CRMRC_PATH, SOURCE, key, REGISTRY, DL, PLEASE_TRY
                         ));
@@ -181,7 +181,7 @@ impl RuntimeConfig {
                     map.insert(key.to_string(), RegistryDescription::new(registry, dl));
                 }
                 None => {
-                    error_print(format!(
+                    to_out(format!(
                         "{} 文件中的 {} 字段不是一个 {}, {}",
                         CRMRC_PATH, key, BIAO, PLEASE_TRY
                     ));
