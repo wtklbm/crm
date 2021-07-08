@@ -11,9 +11,11 @@ keywords = ["cargo", "registry"]
 exclude = [".vscode/**"]
 
 [profile.release]
-lto = true
-panic = "abort"
+codegen-units = 1
 incremental = true
+lto = true
+opt-level = 'z'
+panic = "abort"
 
 [dependencies]
 toml_edit = "0.2.1"
