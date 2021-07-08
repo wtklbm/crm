@@ -194,7 +194,11 @@ impl Registry {
 
         if !is_default_registry {
             self.default();
-            println!(" [INFO] 已从 {} 镜像切换到官方镜像\n", registry_name);
+
+            to_out(format!(
+                "已从 {} 镜像切换到官方镜像，当命令执行完成后会自动切换回 {0} 镜像",
+                registry_name
+            ));
         }
 
         let mut program = "sh";
@@ -210,6 +214,11 @@ impl Registry {
                 Ok(path) => path,
                 Err(_) => {
                     to_out(format!("没有找到指定的文件或目录: {}", cwd));
+
+                    if !is_default_registry {
+                        self.select(Some(&registry_name));
+                    }
+
                     process::exit(-1);
                 }
             },
@@ -228,7 +237,6 @@ impl Registry {
 
         if !is_default_registry {
             self.select(Some(&registry_name));
-            println!("\n [INFO] 已从官方镜像切换到 {} 镜像", registry_name);
         }
     }
 }
