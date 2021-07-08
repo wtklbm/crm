@@ -54,7 +54,7 @@ pub const ZI_FU_CHUAN: &str = "字符串";
 pub const PLEASE_TRY: &str = "请修改/删除后重试";
 
 /// `UNC` 路径前缀
-pub const UNC_PREFIX:&str = r"\\?\";
+pub const UNC_PREFIX: &str = r"\\?\";
 
 /// 默认镜像内容
 pub const CRMRC_FILE: &str = r#"
