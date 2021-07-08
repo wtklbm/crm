@@ -2,15 +2,18 @@
 //!
 //! 该模块用于操作镜像。包括简单的增删改查操作。
 
-use std::process;
+use std::{
+    env,
+    process::{self, Command, Stdio},
+};
 
 use crate::{
     cargo::CargoConfig,
     constants::{APP_NAME, APP_VERSION, RUST_LANG},
     runtime::RuntimeConfig,
     util::{
-        append_end_spaces, error_print, is_registry_addr, is_registry_dl, is_registry_name,
-        network_delay, status_prefix,
+        absolute_path, append_end_spaces, error_print, is_registry_addr, is_registry_dl,
+        is_registry_name, is_windows, network_delay, status_prefix,
     },
 };
 
@@ -141,7 +144,7 @@ impl Registry {
     fn test_status(
         &self,
         name: Option<&String>,
-        sender_size: Option<usize>
+        sender_size: Option<usize>,
     ) -> Vec<(String, Option<u128>)> {
         let urls = match name {
             Some(name) => {
@@ -182,5 +185,45 @@ impl Registry {
             .collect();
 
         println!("{}", status.join("\n"));
+    }
+
+    /// 自动切换镜像源并执行 `cargo publish` 命令
+    pub fn publish(&mut self, cwd: Option<&String>) {
+        let (registry_name, _) = self.current();
+
+        self.default();
+        println!(" [INFO] 已从 {} 镜像切换到官方镜像\n", registry_name);
+
+        let mut program = "sh";
+        let mut arg_c = "-c";
+
+        if is_windows() {
+            program = "cmd";
+            arg_c = "/c"
+        }
+
+        let cwd = match cwd {
+            Some(cwd) => match absolute_path(cwd) {
+                Ok(path) => path,
+                Err(_) => {
+                    error_print(format!("没有找到指定的文件或目录: {}", cwd));
+                    process::exit(-1);
+                }
+            },
+            None => env::current_dir().unwrap(),
+        };
+
+        match Command::new(program)
+            .current_dir(cwd)
+            .args(&[arg_c, "cargo publish"])
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .output()
+        {
+            _ => (),
+        }
+
+        self.select(Some(&registry_name));
+        println!("\n [INFO] 已从官方镜像切换到 {} 镜像", registry_name);
     }
 }
