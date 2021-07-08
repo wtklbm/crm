@@ -6,16 +6,18 @@
 
 use std::{
     env,
+    ffi::OsStr,
     fmt::Display,
     fs::read_to_string,
-    path::PathBuf,
+    io,
+    path::{Path, PathBuf},
     process,
     sync::mpsc,
     thread,
     time::{Duration, SystemTime},
 };
 
-use crate::constants::{CARGO, CARGO_CONFIG_PATH, CARGO_HOME, CONFIG};
+use crate::constants::{CARGO, CARGO_CONFIG_PATH, CARGO_HOME, CONFIG, UNC_PREFIX};
 
 pub fn home_dir() -> PathBuf {
     env::home_dir().unwrap()
@@ -161,18 +163,50 @@ pub fn status_prefix(value1: &String, value2: &String) -> String {
     if value1.eq(value2) { "  * " } else { "    " }.to_string()
 }
 
+pub fn is_windows() -> bool {
+    cfg!(target_os = "windows")
+}
+
+pub fn absolute_path<T: AsRef<OsStr>>(dir: &T) -> io::Result<PathBuf> {
+    match Path::new(dir).canonicalize() {
+        Ok(mut path) => {
+            let path_str = path.to_str().unwrap();
+
+            // 如果是 `Windows`，并且当前路径是 `UNC` 路径
+            if is_windows() && path_str.starts_with(UNC_PREFIX) {
+                let path_slice = &path_str[UNC_PREFIX.len()..];
+
+                // 路径不能超过普通 `Windows` 路径的长度
+                if path_slice.len() > 260 {
+                    error_print(format!(
+                        "当前路径超过了 Windows 普通路径的最大长度: {}",
+                        path_str
+                    ));
+                    process::exit(-1);
+                }
+
+                path = PathBuf::from(path_slice);
+            }
+
+            Ok(path)
+        }
+        Err(e) => Err(e),
+    }
+}
+
 pub fn not_command(command: &str) {
     let r = r#"
   crm best                    评估网络延迟并自动切换到最优的镜像
   crm current                 获取当前所使用的镜像
   crm default                 恢复为默认的镜像
   crm list                    从镜像配置文件中获取镜像列表
+  crm publish [cwd]           自动切换镜像源并执行 "cargo publish" 命令
   crm remove <name>           在镜像配置文件中删除镜像
   crm save <name> <addr> <dl> 在镜像配置文件中添加/更新镜像
   crm test [name]             下载测试包以评估网络延迟
   crm use <name>              切换为要使用的镜像
 "#;
 
-    error_print(format!("{} 命令无效。参考:\n{}", command, r.trim_end()));
+    error_print(format!("{} 命令无效。参考:\n{}", command, r));
     process::exit(-1);
 }
