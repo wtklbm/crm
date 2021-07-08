@@ -206,14 +206,14 @@ impl Registry {
 
         if is_windows() {
             program = "cmd";
-            arg_c = "/c"
+            arg_c = "/c";
         }
 
         let cwd = match cwd {
             Some(cwd) => match absolute_path(cwd) {
                 Ok(path) => path,
-                Err(_) => {
-                    to_out(format!("没有找到指定的文件或目录: {}", cwd));
+                Err(e) => {
+                    to_out(e);
 
                     if !is_default_registry {
                         self.select(Some(&registry_name));
