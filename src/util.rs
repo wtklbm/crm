@@ -46,7 +46,7 @@ pub fn get_cargo_config() -> String {
 
 pub fn is_registry_name(name: Option<&String>) -> &str {
     if name.is_none() {
-        error_print("请输入正确的镜像名");
+        to_out("请输入正确的镜像名");
         process::exit(-1);
     }
 
@@ -55,7 +55,7 @@ pub fn is_registry_name(name: Option<&String>) -> &str {
 
 pub fn is_registry_addr(addr: Option<&String>) -> &str {
     if addr.is_none() {
-        error_print("请输入正确的镜像地址");
+        to_out("请输入正确的镜像地址");
         process::exit(-1);
     }
 
@@ -64,7 +64,7 @@ pub fn is_registry_addr(addr: Option<&String>) -> &str {
 
 pub fn is_registry_dl(dl: Option<&String>) -> &str {
     if dl.is_none() {
-        error_print("请输入正确的 dl。\n  每一个镜像源都是一个 Git 存储库，而在该存储库的根目录下有一个 config.json 文件，\n  其中，dl 属性是 config.json 文件中的一个字段。");
+        to_out("请输入正确的 dl。\n  每一个镜像源都是一个 Git 存储库，而在该存储库的根目录下有一个 config.json 文件，\n  其中，dl 属性是 config.json 文件中的一个字段。");
         process::exit(-1);
     }
 
@@ -149,14 +149,14 @@ pub fn network_delay(
 }
 
 pub fn field_eprint(field_name: &str, field_type: &str) {
-    error_print(format!(
+    to_out(format!(
         "{} 文件中的 {} 字段不是一个{}，请修改后重试",
         CARGO_CONFIG_PATH, field_name, field_type
     ));
 }
 
-pub fn error_print<T: Display>(message: T) {
-    eprint!(" {}", message);
+pub fn to_out<T: Display>(message: T) {
+    println!(" {}", message);
 }
 
 pub fn status_prefix(value1: &String, value2: &String) -> String {
@@ -178,7 +178,7 @@ pub fn absolute_path<T: AsRef<OsStr>>(dir: &T) -> io::Result<PathBuf> {
 
                 // 路径不能超过普通 `Windows` 路径的长度
                 if path_slice.len() > 260 {
-                    error_print(format!(
+                    to_out(format!(
                         "当前路径超过了 Windows 普通路径的最大长度: {}",
                         path_str
                     ));
@@ -207,6 +207,6 @@ pub fn not_command(command: &str) {
   crm use <name>              切换为要使用的镜像
 "#;
 
-    error_print(format!("{} 命令无效。参考:\n{}", command, r));
+    to_out(format!("{} 命令无效。参考:\n{}", command, r));
     process::exit(-1);
 }
