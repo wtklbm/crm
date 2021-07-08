@@ -6,7 +6,7 @@ use std::{fs, path::Path, process};
 
 use toml_edit::{Document, Table, TomlError};
 
-use crate::util::error_print;
+use crate::util::to_out;
 
 #[derive(Debug)]
 pub struct Toml {
@@ -41,7 +41,7 @@ impl Toml {
     /// 写入到文件中
     pub fn write<P: AsRef<Path>>(&self, path: P) {
         if let Err(e) = fs::write(path, self.to_string()) {
-            error_print(format!("写入文件失败:\n  {}", e));
+            to_out(format!("写入文件失败:\n  {}", e));
             process::exit(-1);
         }
     }
