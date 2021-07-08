@@ -14,7 +14,7 @@ use crate::{
     },
     description::RegistryDescription,
     toml::Toml,
-    util::{cargo_config_path, error_print, field_eprint, get_cargo_config},
+    util::{cargo_config_path, field_eprint, get_cargo_config, to_out},
 };
 
 /// `Cargo` 配置对象
@@ -51,7 +51,7 @@ impl CargoConfig {
                 CargoConfig { data: config }
             }
             Err(_) => {
-                error_print(format!(
+                to_out(format!(
                     "{} 文件解析失败，{}",
                     CARGO_CONFIG_PATH, PLEASE_TRY
                 ));
