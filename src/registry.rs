@@ -12,8 +12,8 @@ use crate::{
     constants::{APP_NAME, APP_VERSION, RUST_LANG},
     runtime::RuntimeConfig,
     util::{
-        absolute_path, append_end_spaces, error_print, is_registry_addr, is_registry_dl,
-        is_registry_name, is_windows, network_delay, status_prefix,
+        absolute_path, append_end_spaces, is_registry_addr, is_registry_dl, is_registry_name,
+        is_windows, network_delay, status_prefix, to_out,
     },
 };
 
@@ -43,13 +43,13 @@ impl Registry {
             let keys = self.rc.to_key_string();
 
             if keys.is_empty() {
-                return error_print(format!(
+                return to_out(format!(
                     "没有找到 {} 镜像，配置中的镜像列表为空，请用 \"crm save\" 添加镜像后重试",
                     name,
                 ));
             }
 
-            error_print(format!("没有找到 {} 镜像，可选的镜像是:\n{}", name, keys));
+            to_out(format!("没有找到 {} 镜像，可选的镜像是:\n{}", name, keys));
         };
 
         self.cargo.make();
@@ -60,12 +60,12 @@ impl Registry {
         let name = is_registry_name(name).trim();
 
         if let Some(_) = self.rc.get_default(name) {
-            error_print("请不要删除内置镜像");
+            to_out("请不要删除内置镜像");
             process::exit(-1);
         }
 
         if let None = self.rc.get_extend(name) {
-            error_print(format!("删除失败，{} 镜像不存在", name));
+            to_out(format!("删除失败，{} 镜像不存在", name));
             process::exit(-1);
         }
 
@@ -113,13 +113,13 @@ impl Registry {
         let found = tested.iter().find(|v| v.1.is_some());
 
         if found.is_none() {
-            return error_print("没有可切换的镜像源");
+            return to_out("没有可切换的镜像源");
         }
 
         let registry_name = &found.unwrap().0;
 
         self.select(Some(registry_name));
-        println!("已切换到 {} 镜像源", registry_name);
+        to_out(format!("已切换到 {} 镜像源", registry_name));
     }
 
     /// 将 `dl` 转换为 `url`
@@ -149,7 +149,7 @@ impl Registry {
         let urls = match name {
             Some(name) => {
                 if self.rc.get(name).is_none() {
-                    error_print(format!("测试失败，{} 镜像不存在", name));
+                    to_out(format!("测试失败，{} 镜像不存在", name));
                     process::exit(-1);
                 }
 
@@ -206,7 +206,7 @@ impl Registry {
             Some(cwd) => match absolute_path(cwd) {
                 Ok(path) => path,
                 Err(_) => {
-                    error_print(format!("没有找到指定的文件或目录: {}", cwd));
+                    to_out(format!("没有找到指定的文件或目录: {}", cwd));
                     process::exit(-1);
                 }
             },
