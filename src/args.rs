@@ -21,7 +21,10 @@
 
 use std::env::args_os;
 
-use crate::{registry::Registry, util::not_command};
+use crate::{
+    registry::Registry,
+    util::{not_command, to_out},
+};
 
 type Args = (String, Vec<String>);
 
@@ -81,8 +84,8 @@ pub fn handle_command((command, args): Args) {
             let (name, addr) = r.current();
 
             match addr {
-                Some(addr) => println!("{}: {}", name, addr),
-                None => println!("{}", name),
+                Some(addr) => to_out(format!("{}: {}", name, addr)),
+                None => to_out(format!("{}", name)),
             };
         }
 
