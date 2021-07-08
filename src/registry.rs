@@ -190,9 +190,12 @@ impl Registry {
     /// 自动切换镜像源并执行 `cargo publish` 命令
     pub fn publish(&mut self, cwd: Option<&String>) {
         let (registry_name, _) = self.current();
+        let is_default_registry = registry_name.eq(RUST_LANG);
 
-        self.default();
-        println!(" [INFO] 已从 {} 镜像切换到官方镜像\n", registry_name);
+        if !is_default_registry {
+            self.default();
+            println!(" [INFO] 已从 {} 镜像切换到官方镜像\n", registry_name);
+        }
 
         let mut program = "sh";
         let mut arg_c = "-c";
@@ -223,7 +226,9 @@ impl Registry {
             _ => (),
         }
 
-        self.select(Some(&registry_name));
-        println!("\n [INFO] 已从官方镜像切换到 {} 镜像", registry_name);
+        if !is_default_registry {
+            self.select(Some(&registry_name));
+            println!("\n [INFO] 已从官方镜像切换到 {} 镜像", registry_name);
+        }
     }
 }
