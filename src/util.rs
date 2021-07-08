@@ -178,11 +178,12 @@ pub fn absolute_path<T: AsRef<OsStr>>(dir: &T) -> io::Result<PathBuf> {
 
                 // 路径不能超过普通 `Windows` 路径的长度
                 if path_slice.len() > 260 {
-                    to_out(format!(
-                        "当前路径超过了 Windows 普通路径的最大长度: {}",
-                        path_str
-                    ));
-                    process::exit(-1);
+                    let error = io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        format!("当前路径超过了 Windows 普通路径的最大长度: {}", path_str),
+                    );
+
+                    return Err(error);
                 }
 
                 path = PathBuf::from(path_slice);
@@ -190,7 +191,7 @@ pub fn absolute_path<T: AsRef<OsStr>>(dir: &T) -> io::Result<PathBuf> {
 
             Ok(path)
         }
-        Err(e) => Err(e),
+        Err(error) => Err(error),
     }
 }
 
