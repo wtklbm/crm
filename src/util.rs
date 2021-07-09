@@ -117,10 +117,7 @@ pub fn network_delay(
 ) -> Vec<(String, Option<u128>)> {
     let (tx, rx) = mpsc::channel();
     let iter = values.iter();
-    let len = match sender_size {
-        Some(size) => size,
-        None => iter.len(),
-    };
+    let len = sender_size.unwrap_or_else(|| iter.len());
     let mut ret = vec![];
 
     for v in iter {
@@ -168,31 +165,27 @@ pub fn is_windows() -> bool {
 }
 
 pub fn absolute_path<T: AsRef<OsStr>>(dir: &T) -> io::Result<PathBuf> {
-    match Path::new(dir).canonicalize() {
-        Ok(mut path) => {
-            let path_str = path.to_str().unwrap();
+    let mut path = Path::new(dir).canonicalize()?;
+    let path_str = path.to_str().unwrap();
 
-            // 如果是 `Windows`，并且当前路径是 `UNC` 路径
-            if is_windows() && path_str.starts_with(UNC_PREFIX) {
-                let path_slice = &path_str[UNC_PREFIX.len()..];
+    // 如果是 `Windows`，并且当前路径是 `UNC` 路径
+    if is_windows() && path_str.starts_with(UNC_PREFIX) {
+        let path_slice = &path_str[UNC_PREFIX.len()..];
 
-                // 路径不能超过普通 `Windows` 路径的长度
-                if path_slice.len() > 260 {
-                    let error = io::Error::new(
-                        io::ErrorKind::InvalidData,
-                        format!("当前路径超过了 Windows 普通路径的最大长度: {}", path_str),
-                    );
+        // 路径不能超过普通 `Windows` 路径的长度
+        if path_slice.len() > 260 {
+            let error = io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("当前路径超过了 Windows 普通路径的最大长度: {}", path_str),
+            );
 
-                    return Err(error);
-                }
-
-                path = PathBuf::from(path_slice);
-            }
-
-            Ok(path)
+            return Err(error);
         }
-        Err(error) => Err(error),
+
+        path = PathBuf::from(path_slice);
     }
+
+    Ok(path)
 }
 
 pub fn not_command(command: &str) {
