@@ -42,12 +42,12 @@ impl RuntimeConfig {
             Err(_) => String::new(),
         };
 
-        let extend = RuntimeConfig::get_config(&data);
-        let default = RuntimeConfig::get_config(&CRMRC_FILE.to_string());
+        let extend = RuntimeConfig::parse(&data);
+        let default = RuntimeConfig::parse(&CRMRC_FILE.to_string());
 
         RuntimeConfig {
-            extend: RuntimeConfig::to_map(&extend),
-            default: RuntimeConfig::to_map(&default),
+            extend: RuntimeConfig::extract_to_map(&extend),
+            default: RuntimeConfig::extract_to_map(&default),
             path: rc_path,
             config: extend,
         }
@@ -90,7 +90,7 @@ impl RuntimeConfig {
 
     /// 将运行时配置写入到文件中
     pub fn write(&mut self) {
-        self.from_map();
+        self.convert_from_map();
         self.config.write(&self.path);
     }
 
@@ -128,7 +128,8 @@ impl RuntimeConfig {
         self.extend.remove(registry_name);
     }
 
-    fn get_config(data: &String) -> Toml {
+    /// 将字符串解析为 `Toml` 对象
+    fn parse(data: &String) -> Toml {
         let config = Toml::parse(&data);
 
         if let Err(_) = config {
@@ -155,7 +156,7 @@ impl RuntimeConfig {
     }
 
     /// 从配置转换为 `HashMap`
-    fn to_map(config: &Toml) -> HashMap<String, RegistryDescription> {
+    fn extract_to_map(config: &Toml) -> HashMap<String, RegistryDescription> {
         let data = config.table();
         let source = data[SOURCE].as_table().unwrap();
         let mut map = HashMap::new();
@@ -193,7 +194,7 @@ impl RuntimeConfig {
     }
 
     /// 从 `HashMap` 转换为配置
-    fn from_map(&mut self) {
+    fn convert_from_map(&mut self) {
         let config = self.config.table_mut();
         config[SOURCE] = table();
         let source = config[SOURCE].as_table_mut().unwrap();
