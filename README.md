@@ -26,17 +26,28 @@ $ cargo install crm
 
 ```bash
 # 在终端执行
+#
+# NOTE:
+#  - [args] 表示 args 是一个或多个可选参数
+#  - <name> 表示 name 是一个必填参数
+#
+# 下面这些命令在执行时会自动切换为官方镜像，避免了手动切换镜像的麻烦：
+#  - `crm install` 对应 `cargo install`
+#  - `crm publish` 对应 `cargo publish`
+#  - `crm update` 对应 `cargo update`
 
 $ crm
 
   crm best                    评估网络延迟并自动切换到最优的镜像
   crm current                 获取当前所使用的镜像
-  crm default                 恢复为默认的镜像
+  crm default                 恢复为官方默认镜像
+  crm install [args]          使用官方镜像执行 "cargo install"
   crm list                    从镜像配置文件中获取镜像列表
-  crm publish [cwd]           自动切换镜像源并执行 "cargo publish" 命令
+  crm publish [args]          使用官方镜像执行 "cargo publish"
   crm remove <name>           在镜像配置文件中删除镜像
   crm save <name> <addr> <dl> 在镜像配置文件中添加/更新镜像
   crm test [name]             下载测试包以评估网络延迟
+  crm update [args]           使用官方镜像执行 "cargo update"
   crm use <name>              切换为要使用的镜像
 ```
 
