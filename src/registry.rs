@@ -2,18 +2,15 @@
 //!
 //! 该模块用于操作镜像。包括简单的增删改查操作。
 
-use std::{
-    env,
-    process::{self, Command, Stdio},
-};
+use std::process;
 
 use crate::{
     cargo::CargoConfig,
-    constants::{APP_NAME, APP_VERSION, RUST_LANG},
+    constants::{APP_NAME, APP_VERSION, CARGO, RUST_LANG},
     runtime::RuntimeConfig,
     util::{
-        absolute_path, append_end_spaces, is_registry_addr, is_registry_dl, is_registry_name,
-        is_windows, network_delay, status_prefix, to_out,
+        append_end_spaces, exec_command, is_registry_addr, is_registry_dl, is_registry_name,
+        network_delay, status_prefix, to_out,
     },
 };
 
@@ -187,57 +184,39 @@ impl Registry {
         println!("{}", status.join("\n"));
     }
 
-    /// 自动切换镜像源并执行 `cargo publish` 命令
-    /// TODO: 有可能需要为 `cargo publish` 添加参数
-    pub fn publish(&mut self, cwd: Option<&String>) {
+    /// 使用官方镜像源执行命令
+    fn exec(&mut self, command: &String) {
         let (registry_name, _) = self.current();
         let is_default_registry = registry_name.eq(RUST_LANG);
 
         if !is_default_registry {
             self.default();
-
-            to_out(format!(
-                "已从 {} 镜像切换到官方镜像，当命令执行完成后会自动切换回 {0} 镜像",
-                registry_name
-            ));
         }
 
-        let mut program = "sh";
-        let mut arg_c = "-c";
-
-        if is_windows() {
-            program = "cmd";
-            arg_c = "/c";
-        }
-
-        let cwd = match cwd {
-            Some(cwd) => match absolute_path(cwd) {
-                Ok(path) => path,
-                Err(e) => {
-                    to_out(e);
-
-                    if !is_default_registry {
-                        self.select(Some(&registry_name));
-                    }
-
-                    process::exit(-1);
-                }
-            },
-            None => env::current_dir().unwrap(),
+        if let Err(e) = exec_command(&command, None) {
+            to_out(e);
         };
-
-        match Command::new(program)
-            .current_dir(cwd)
-            .args(&[arg_c, "cargo publish"])
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .output()
-        {
-            _ => (),
-        }
 
         if !is_default_registry {
             self.select(Some(&registry_name));
         }
+    }
+
+    /// 使用官方镜像执行 `cargo publish`
+    pub fn publish(&mut self, args: String) {
+        self.exec(&format!("{} publish {}", CARGO, args.trim()));
+    }
+
+    /// 使用官方镜像执行 `cargo update`
+    pub fn update(&mut self, args: String) {
+        self.exec(&format!("{} update {}", CARGO, args.trim()));
+    }
+
+    /// 使用官方镜像执行 `cargo install`
+    pub fn install(&mut self, args: String) {
+        let args = args.trim();
+        let args = if args.is_empty() { "--help" } else { args };
+
+        self.exec(&format!("{} install {}", CARGO, args));
     }
 }
