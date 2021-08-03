@@ -11,13 +11,13 @@ use std::{
     fs::read_to_string,
     io,
     path::{Path, PathBuf},
-    process,
+    process::{self, Command, Output, Stdio},
     sync::mpsc,
     thread,
     time::{Duration, SystemTime},
 };
 
-use crate::constants::{CARGO, CARGO_CONFIG_PATH, CARGO_HOME, CONFIG, UNC_PREFIX};
+use crate::constants::{CARGO_CONFIG_PATH, CARGO_HOME, CONFIG, DOT_CARGO, UNC_PREFIX};
 
 pub fn home_dir() -> PathBuf {
     env::home_dir().unwrap()
@@ -26,7 +26,7 @@ pub fn home_dir() -> PathBuf {
 pub fn cargo_home() -> PathBuf {
     match env::var_os(CARGO_HOME) {
         Some(value) => PathBuf::from(value),
-        None => home_dir().clone().join(CARGO),
+        None => home_dir().clone().join(DOT_CARGO),
     }
 }
 
@@ -188,16 +188,50 @@ pub fn absolute_path<T: AsRef<OsStr>>(dir: &T) -> io::Result<PathBuf> {
     Ok(path)
 }
 
+pub fn exec_command(command: &str, cwd: Option<&String>) -> io::Result<Output> {
+    let mut program = "sh";
+    let mut arg_c = "-c";
+
+    if is_windows() {
+        program = "cmd";
+        arg_c = "/c";
+    }
+
+    let cwd = match cwd {
+        Some(cwd) => match absolute_path(cwd) {
+            Ok(path) => path,
+            Err(e) => {
+                return Err(e);
+            }
+        },
+        None => env::current_dir().unwrap(),
+    };
+
+    match Command::new(program)
+        .current_dir(cwd)
+        .args(&[arg_c, command])
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .output()
+    {
+        Ok(output) => Ok(output),
+        Err(e) => Err(e),
+    }
+}
+
 pub fn not_command(command: &str) {
     let r = r#"
   crm best                    评估网络延迟并自动切换到最优的镜像
   crm current                 获取当前所使用的镜像
-  crm default                 恢复为默认的镜像
+  crm default                 恢复为官方默认镜像
+  crm install [args]          使用官方镜像执行 "cargo install"
   crm list                    从镜像配置文件中获取镜像列表
-  crm publish [cwd]           自动切换镜像源并执行 "cargo publish" 命令
+  crm publish [args]          使用官方镜像执行 "cargo publish"
   crm remove <name>           在镜像配置文件中删除镜像
   crm save <name> <addr> <dl> 在镜像配置文件中添加/更新镜像
   crm test [name]             下载测试包以评估网络延迟
+  crm update [args]           使用官方镜像执行 "cargo update"
   crm use <name>              切换为要使用的镜像
 "#;
 
