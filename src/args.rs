@@ -6,12 +6,14 @@
 //! 目前可接收的运行时参数主要包括:
 //!   - `crm best`:                    评估网络延迟并自动切换到最优的镜像
 //!   - `crm current`:                 获取当前所使用的镜像
-//!   - `crm default`:                 恢复为默认的镜像
+//!   - `crm default`:                 恢复为官方默认镜像
+//!   - `crm install [args]`           使用官方镜像执行 `cargo install`
 //!   - `crm list`:                    从镜像配置文件中获取镜像列表
-//!   - `crm publish [cwd]`:           自动切换镜像源并执行 `cargo publish` 命令
+//!   - `crm publish [args]`:          使用官方镜像执行 `cargo publish`
 //!   - `crm remove <name>`:           在镜像配置文件中删除镜像
 //!   - `crm save <name> <addr> <dl>`: 在镜像配置文件中添加/更新镜像
 //!   - `crm test [name]`:             下载测试包以评估网络延迟
+//!   - `crm update [args]`:           使用官方镜像执行 `cargo update`
 //!   - `crm use <name>`:              切换为要使用的镜像
 //!
 //! 其中，`save`、`remove` 命令只修改 `${HOME}/.crmrc` 配置文件，
@@ -73,8 +75,14 @@ pub fn handle_command((command, args): Args) {
         // 删除镜像
         "remove" => r.remove(args.get(0)),
 
-        // 自动切换镜像源并执行 `cargo publish`
-        "publish" => r.publish(args.get(0)),
+        // 使用官方镜像执行 `cargo publish`
+        "publish" => r.publish(args.join(" ")),
+
+        // 使用官方镜像执行 `cargo update`
+        "update" => r.update(args.join(" ")),
+
+        // 使用官方镜像执行 `cargo install`
+        "install" => r.install(args.join(" ")),
 
         // 对镜像源网络延迟进行评估
         "test" => r.test(&r.current().0, args.get(0)),
