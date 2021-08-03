@@ -26,8 +26,11 @@ pub const CRMRC_PATH: &str = "~/.crmrc";
 /// 用户查找 `"CARGO_HOME"` 环境变量
 pub const CARGO_HOME: &str = "CARGO_HOME";
 
+/// `"CARGO"`
+pub const CARGO: &str = "cargo";
+
 /// `"CARGO_HOME"` 目录下的 `.cargo` 文件夹
-pub const CARGO: &str = ".cargo";
+pub const DOT_CARGO: &str = ".cargo";
 
 /// `${CARGO_HOME}/.cargo` 目录下的 `config` 文件
 pub const CONFIG: &str = "config";
