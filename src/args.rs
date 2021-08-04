@@ -7,7 +7,7 @@
 //!   - `crm best`:                    评估网络延迟并自动切换到最优的镜像
 //!   - `crm current`:                 获取当前所使用的镜像
 //!   - `crm default`:                 恢复为官方默认镜像
-//!   - `crm install [args]`           使用官方镜像执行 `cargo install`
+//!   - `crm install [args]`:          使用官方镜像执行 `cargo install`
 //!   - `crm list`:                    从镜像配置文件中获取镜像列表
 //!   - `crm publish [args]`:          使用官方镜像执行 `cargo publish`
 //!   - `crm remove <name>`:           在镜像配置文件中删除镜像
