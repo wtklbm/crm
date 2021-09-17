@@ -6,7 +6,7 @@ use std::{fs, path::Path, process};
 
 use toml_edit::{Document, Table, TomlError};
 
-use crate::util::to_out;
+use crate::utils::to_out;
 
 #[derive(Debug)]
 pub struct Toml {
