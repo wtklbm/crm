@@ -48,10 +48,10 @@ pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const CARGO_CONFIG_PATH: &str = "$CARGO_HOME/.cargo/config";
 
 /// 表
-pub const BIAO: &str = "表";
+pub const TABLE: &str = "表";
 
 /// 字符串
-pub const ZI_FU_CHUAN: &str = "字符串";
+pub const STRING: &str = "字符串";
 
 /// 请修改/删除后重试
 pub const PLEASE_TRY: &str = "请修改/删除后重试";
