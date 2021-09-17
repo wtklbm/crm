@@ -8,7 +8,7 @@ use std::{collections::HashMap, fs::read_to_string, path::PathBuf, process};
 use toml_edit::{table, value};
 
 use crate::{
-    constants::{BIAO, CRMRC, CRMRC_FILE, CRMRC_PATH, DL, PLEASE_TRY, REGISTRY, SOURCE},
+    constants::{CRMRC, CRMRC_FILE, CRMRC_PATH, DL, PLEASE_TRY, REGISTRY, SOURCE, TABLE},
     description::RegistryDescription,
     toml::Toml,
     util::{append_end_spaces, home_dir, status_prefix, to_out},
@@ -147,7 +147,7 @@ impl RuntimeConfig {
         } else if !source.is_table() {
             to_out(format!(
                 "{} 文件中的 {} 字段不是一个{}，{}",
-                CRMRC_PATH, SOURCE, BIAO, PLEASE_TRY
+                CRMRC_PATH, SOURCE, TABLE, PLEASE_TRY
             ));
             process::exit(-1);
         }
@@ -184,7 +184,7 @@ impl RuntimeConfig {
                 None => {
                     to_out(format!(
                         "{} 文件中的 {} 字段不是一个 {}, {}",
-                        CRMRC_PATH, key, BIAO, PLEASE_TRY
+                        CRMRC_PATH, key, TABLE, PLEASE_TRY
                     ));
                     process::exit(-1);
                 }
