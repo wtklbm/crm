@@ -25,7 +25,7 @@ use std::env::args_os;
 
 use crate::{
     registry::Registry,
-    util::{not_command, to_out},
+    utils::{not_command, to_out},
 };
 
 type Args = (String, Vec<String>);
