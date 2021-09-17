@@ -9,8 +9,8 @@ use toml_edit::{table, value};
 
 use crate::{
     constants::{
-        BIAO, CARGO_CONFIG_PATH, CRATES_IO, PLEASE_TRY, REGISTRY, REPLACE_WITH, RUST_LANG, SOURCE,
-        ZI_FU_CHUAN,
+        CARGO_CONFIG_PATH, CRATES_IO, PLEASE_TRY, REGISTRY, REPLACE_WITH, RUST_LANG, SOURCE,
+        STRING, TABLE,
     },
     description::RegistryDescription,
     toml::Toml,
@@ -44,7 +44,7 @@ impl CargoConfig {
                 if source.is_none() {
                     data[SOURCE] = table();
                 } else if !source.is_table() {
-                    field_eprint(SOURCE, BIAO);
+                    field_eprint(SOURCE, TABLE);
                     process::exit(-1);
                 }
 
@@ -73,7 +73,7 @@ impl CargoConfig {
         if crates_io.is_none() {
             data[SOURCE][CRATES_IO] = table();
         } else if !crates_io.is_table() {
-            field_eprint(CRATES_IO, BIAO);
+            field_eprint(CRATES_IO, TABLE);
             process::exit(-1);
         }
     }
@@ -107,7 +107,7 @@ impl CargoConfig {
             match replace_with.as_str() {
                 Some(name) => name,
                 None => {
-                    field_eprint(REPLACE_WITH, ZI_FU_CHUAN);
+                    field_eprint(REPLACE_WITH, STRING);
                     process::exit(-1);
                 }
             }
@@ -134,7 +134,7 @@ impl CargoConfig {
         if registry.is_none() {
             source[registry_name] = table();
         } else if !registry.is_table() {
-            field_eprint(registry_name, BIAO);
+            field_eprint(registry_name, TABLE);
             process::exit(-1);
         }
 
