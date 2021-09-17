@@ -5,4 +5,4 @@ pub mod description;
 pub mod registry;
 pub mod runtime;
 pub mod toml;
-pub mod util;
+pub mod utils;
