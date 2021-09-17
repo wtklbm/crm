@@ -11,7 +11,7 @@ use crate::{
     constants::{CRMRC, CRMRC_FILE, CRMRC_PATH, DL, PLEASE_TRY, REGISTRY, SOURCE, TABLE},
     description::RegistryDescription,
     toml::Toml,
-    util::{append_end_spaces, home_dir, status_prefix, to_out},
+    utils::{append_end_spaces, home_dir, status_prefix, to_out},
 };
 
 /// 运行时配置
