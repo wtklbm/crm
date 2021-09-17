@@ -8,7 +8,7 @@ use crate::{
     cargo::CargoConfig,
     constants::{APP_NAME, APP_VERSION, CARGO, RUST_LANG},
     runtime::RuntimeConfig,
-    util::{
+    utils::{
         append_end_spaces, exec_command, is_registry_addr, is_registry_dl, is_registry_name,
         network_delay, status_prefix, to_out,
     },
