@@ -14,7 +14,7 @@ use crate::{
     },
     description::RegistryDescription,
     toml::Toml,
-    util::{cargo_config_path, field_eprint, get_cargo_config, to_out},
+    utils::{cargo_config_path, field_eprint, get_cargo_config, to_out},
 };
 
 /// `Cargo` 配置对象
