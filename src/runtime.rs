@@ -3,12 +3,20 @@
 //! `runtime` 是一个处理程序运行时配置的模块，通过它，我们可以通过执行的命令来更改 `.crmrc` 文件。
 //! 而 `.crmrc` 文件里面存储的是关于 `Cargo` 配置的相关信息。
 
-use std::{collections::HashMap, fs::read_to_string, path::PathBuf, process};
+use std::{
+    collections::{hash_map::Iter, HashMap},
+    fs::read_to_string,
+    iter::Chain,
+    path::PathBuf,
+    process,
+};
 
 use toml_edit::{table, value};
 
 use crate::{
-    constants::{CRMRC, CRMRC_FILE, CRMRC_PATH, DL, PLEASE_TRY, REGISTRY, SOURCE, TABLE},
+    constants::{
+        CRMRC, CRMRC_FILE, CRMRC_PATH, DL, PLEASE_TRY, REGISTRY, RUST_LANG, SOURCE, TABLE,
+    },
     description::RegistryDescription,
     toml::Toml,
     utils::{append_end_spaces, home_dir, status_prefix, to_out},
@@ -66,9 +74,7 @@ impl RuntimeConfig {
     pub fn to_string(&self, current: &String, sep: Option<&str>) -> String {
         let sep = if let None = sep { "" } else { sep.unwrap() };
 
-        self.default
-            .iter()
-            .chain(self.extend.iter())
+        self.iter()
             .fold(String::new(), |mut memo, (k, v)| {
                 let p = status_prefix(k, current);
                 let k = append_end_spaces(k, None);
@@ -126,6 +132,23 @@ impl RuntimeConfig {
     /// 删除运行时配置中的属性
     pub fn remove(&mut self, registry_name: &str) {
         self.extend.remove(registry_name);
+    }
+
+    /// 将镜像名称和镜像地址收集到元祖中，并返回一个元祖数组
+    pub fn to_tuples(&self, exclude_name: Option<&str>) -> Vec<(&str, &str)> {
+        self.iter().fold(vec![], |mut memo, (k, v)| {
+            if k.eq(RUST_LANG) || (exclude_name.is_some() && k.eq(exclude_name.unwrap())) {
+                return memo;
+            }
+
+            memo.push((k, &v.registry));
+            memo
+        })
+    }
+
+    /// 创建迭代器
+    fn iter(&self) -> Chain<Iter<String, RegistryDescription>, Iter<String, RegistryDescription>> {
+        self.default.iter().chain(self.extend.iter())
     }
 
     /// 将字符串解析为 `Toml` 对象
