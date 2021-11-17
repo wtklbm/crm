@@ -5,17 +5,29 @@
 
 use std::process;
 
-use toml_edit::{table, value};
+use toml_edit::{table, value, Table};
 
 use crate::{
     constants::{
-        CARGO_CONFIG_PATH, CRATES_IO, PLEASE_TRY, REGISTRIES, REGISTRY, REPLACE_WITH, RUST_LANG,
-        SOURCE, STRING, TABLE,
+        CARGO_CONFIG_PATH, CRATES_IO, GIT_FETCH_WITH_CLI, NET, PLEASE_TRY, REGISTRIES, REGISTRY,
+        REPLACE_WITH, RUST_LANG, SOURCE, STRING, TABLE,
     },
     description::RegistryDescription,
     toml::Toml,
     utils::{cargo_config_path, field_eprint, get_cargo_config, to_out},
 };
+
+/// 验证字段是否存在
+fn verify_field_exists(data: &mut Table, key: &str) {
+    let value = &data[key];
+
+    if value.is_none() {
+        data[key] = table();
+    } else if !value.is_table() {
+        field_eprint(key, TABLE);
+        process::exit(-1);
+    }
+}
 
 /// `Cargo` 配置对象
 pub struct CargoConfig {
@@ -30,26 +42,13 @@ impl CargoConfig {
 
         match Toml::parse(&toml) {
             Ok(mut config) => {
-                let data = config.table_mut();
-                let source = &data[SOURCE];
+                let data: &mut Table = config.table_mut();
 
                 // 如果没有则创建表，否则判断是不是表
-                if source.is_none() {
-                    data[SOURCE] = table();
-                } else if !source.is_table() {
-                    field_eprint(SOURCE, TABLE);
-                    process::exit(-1);
-                }
-
-                let registries = &data[REGISTRIES];
-
-                // 如果没有则创建表，否则判断是不是表
-                if registries.is_none() {
-                    data[REGISTRIES] = table();
-                } else if !registries.is_table() {
-                    field_eprint(REGISTRIES, TABLE);
-                    process::exit(-1);
-                }
+                verify_field_exists(data, SOURCE);
+                verify_field_exists(data, REGISTRIES);
+                verify_field_exists(data, NET);
+                data[NET][GIT_FETCH_WITH_CLI] = value(true);
 
                 CargoConfig { data: config }
             }
