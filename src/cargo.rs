@@ -9,8 +9,8 @@ use toml_edit::{table, value};
 
 use crate::{
     constants::{
-        CARGO_CONFIG_PATH, CRATES_IO, PLEASE_TRY, REGISTRY, REPLACE_WITH, RUST_LANG, SOURCE,
-        STRING, TABLE,
+        CARGO_CONFIG_PATH, CRATES_IO, PLEASE_TRY, REGISTRIES, REGISTRY, REPLACE_WITH, RUST_LANG,
+        SOURCE, STRING, TABLE,
     },
     description::RegistryDescription,
     toml::Toml,
@@ -28,13 +28,6 @@ impl CargoConfig {
     pub fn new() -> Self {
         let toml = get_cargo_config();
 
-        // 如果文件是空的
-        if toml.trim().is_empty() {
-            return CargoConfig {
-                data: Toml::parse("[source]").unwrap(),
-            };
-        }
-
         match Toml::parse(&toml) {
             Ok(mut config) => {
                 let data = config.table_mut();
@@ -48,8 +41,19 @@ impl CargoConfig {
                     process::exit(-1);
                 }
 
+                let registries = &data[REGISTRIES];
+
+                // 如果没有则创建表，否则判断是不是表
+                if registries.is_none() {
+                    data[REGISTRIES] = table();
+                } else if !registries.is_table() {
+                    field_eprint(REGISTRIES, TABLE);
+                    process::exit(-1);
+                }
+
                 CargoConfig { data: config }
             }
+
             Err(_) => {
                 to_out(format!(
                     "{} 文件解析失败，{}",
@@ -124,10 +128,10 @@ impl CargoConfig {
         (name.to_string(), addr)
     }
 
-    /// 在 `Cargo` 配置文件中添加新的 `[source.xxx]` 镜像属性，并为其指定 `registry` 属性。
-    /// `registry` 属性是强制添加的，`${CARGO_HOME}/.cargo/config` 文件中如果存在则会覆盖，
-    fn append_registry(&mut self, registry_name: &str, addr: String) {
-        let source = &mut self.data.table_mut()[SOURCE];
+    /// 追加属性
+    fn append_attribute(&mut self, key: &str, registry_name: &str, addr: &str) {
+        let config = self.data.table_mut();
+        let source = &mut config[key];
         let registry = &source[registry_name];
 
         // 如果没有 `[source.xxx]` 属性
@@ -138,16 +142,42 @@ impl CargoConfig {
             process::exit(-1);
         }
 
-        source[registry_name][REGISTRY] = value(addr);
+        let attr = match key {
+            SOURCE => REGISTRY,
+            REGISTRIES => "index",
+            _ => {
+                to_out(format!("{:?} 不是预期的属性名", key));
+                process::exit(-1);
+            }
+        };
+
+        // 不管之前存在的值是什么，都要替换成新的值
+        source[registry_name][attr] = value(addr.to_string());
     }
 
-    /// 根据镜像名删除 `config` 中的旧的镜像属性
-    fn remove_old_registry(&mut self, registry_name: &str) {
+    /// 在 `Cargo` 配置文件中添加新的 `[source.xxx]` 镜像属性，并为其指定 `registry` 属性。
+    /// `registry` 属性是强制添加的，`${CARGO_HOME}/.cargo/config` 文件中如果存在则会覆盖。
+    fn append_registry(&mut self, registry_name: &str, addr: String) {
+        self.append_attribute(SOURCE, registry_name, &addr);
+    }
+
+    /// 在 `Cargo` 配置文件中添加新的 `[registries.xxx]` 镜像属性，并为其指定 `index` 属性。
+    /// `index` 属性是强制添加的，`${CARGO_HOME}/.cargo/config` 文件中如果存在则会覆盖。
+    fn append_registries(&mut self, remaining_registries: &Vec<(&str, &str)>) {
+        remaining_registries
+            .iter()
+            .for_each(|(registry_name, registry_addr)| {
+                self.append_attribute(REGISTRIES, registry_name, registry_addr);
+            });
+    }
+
+    /// 删除老的属性
+    fn remove_attribute(&mut self, key: &str, registry_name: &str) {
         if registry_name.eq(RUST_LANG) {
             return;
         }
 
-        let source = &mut self.data.table_mut()[SOURCE];
+        let source = &mut self.data.table_mut()[key];
 
         // 如果没有 `[source.xxx]` 属性
         if source[registry_name].is_none() {
@@ -161,11 +191,23 @@ impl CargoConfig {
             .unwrap();
     }
 
+    /// 根据镜像名删除 `config` 中的旧的镜像属性
+    fn remove_old_registry(&mut self, registry_name: &str) {
+        self.remove_attribute(SOURCE, registry_name);
+    }
+
+    fn remove_old_registries(&mut self, remaining_registries: &Vec<(&str, &str)>) {
+        remaining_registries.iter().for_each(|(registry_name, _)| {
+            self.remove_attribute(REGISTRIES, registry_name);
+        });
+    }
+
     /// 切换 `Cargo` 配置文件中正在使用的镜像
     pub fn use_registry(
         &mut self,
         registry_name: &str,
         registry_description: Option<&RegistryDescription>,
+        remaining_registries: Vec<(&str, &str)>,
     ) -> Result<(), String> {
         if registry_description.is_none() {
             return Err(registry_name.to_string());
@@ -179,6 +221,9 @@ impl CargoConfig {
 
         // 删除老的镜像属性
         self.remove_old_registry(&old_name);
+        self.remove_old_registries(&vec![(registry_name, "")]);
+        self.remove_old_registries(&remaining_registries);
+        self.append_registries(&remaining_registries);
 
         if registry_name.eq(RUST_LANG) {
             return Ok(());
