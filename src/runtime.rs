@@ -4,7 +4,7 @@
 //! 而 `.crmrc` 文件里面存储的是关于 `Cargo` 配置的相关信息。
 
 use std::{
-    collections::{hash_map::Iter, HashMap},
+    collections::{btree_map::Iter, BTreeMap},
     fs::read_to_string,
     iter::Chain,
     path::PathBuf,
@@ -32,10 +32,10 @@ pub struct RuntimeConfig {
     config: Toml,
 
     /// 用户自定义镜像的映射表
-    extend: HashMap<String, RegistryDescription>,
+    extend: BTreeMap<String, RegistryDescription>,
 
     /// 默认镜像的映射表
-    default: HashMap<String, RegistryDescription>,
+    default: BTreeMap<String, RegistryDescription>,
 }
 
 impl RuntimeConfig {
@@ -178,11 +178,11 @@ impl RuntimeConfig {
         config
     }
 
-    /// 从配置转换为 `HashMap`
-    fn extract_to_map(config: &Toml) -> HashMap<String, RegistryDescription> {
+    /// 从配置转换为 `BTreeMap`
+    fn extract_to_map(config: &Toml) -> BTreeMap<String, RegistryDescription> {
         let data = config.table();
         let source = data[SOURCE].as_table().unwrap();
-        let mut map = HashMap::new();
+        let mut map = BTreeMap::new();
 
         source
             .iter()
@@ -216,7 +216,7 @@ impl RuntimeConfig {
         map
     }
 
-    /// 从 `HashMap` 转换为配置
+    /// 从 `BTreeMap` 转换为配置
     fn convert_from_map(&mut self) {
         let config = self.config.table_mut();
         config[SOURCE] = table();
