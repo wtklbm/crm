@@ -14,6 +14,9 @@ pub const REPLACE_WITH: &str = "replace-with";
 /// `${CARGO_HOME}/.cargo/config` 文件中的 `[source.xxx]` 属性下面的 `registry` 属性
 pub const REGISTRY: &str = "registry";
 
+/// `${CARGO_HOME}/.cargo/config` 文件中的 `[registries.xxx]` 属性名
+pub const REGISTRIES: &str = "registries";
+
 /// `cargo` 默认的镜像名
 pub const RUST_LANG: &str = "rust-lang";
 
@@ -23,13 +26,13 @@ pub const CRMRC: &str = ".crmrc";
 /// `${HOME}` 目录下的 `.crmrc` 文件的文件路径
 pub const CRMRC_PATH: &str = "~/.crmrc";
 
-/// 用户查找 `"CARGO_HOME"` 环境变量
+/// 用户查找 `"${CARGO_HOME}"` 环境变量
 pub const CARGO_HOME: &str = "CARGO_HOME";
 
 /// `"CARGO"`
 pub const CARGO: &str = "cargo";
 
-/// `"CARGO_HOME"` 目录下的 `.cargo` 文件夹
+/// `${CARGO_HOME}` 目录下的 `.cargo` 文件夹
 pub const DOT_CARGO: &str = ".cargo";
 
 /// `${CARGO_HOME}/.cargo` 目录下的 `config` 文件
