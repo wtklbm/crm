@@ -37,8 +37,7 @@ impl Registry {
         let name = is_registry_name(name).trim();
 
         // 收集需要添加 `[registries.xxx]` 属性的镜像元祖数组
-        let exclude_name = if name.eq(RUST_LANG) { None } else { Some(name) };
-        let remaining_registries = self.rc.to_tuples(exclude_name);
+        let remaining_registries = self.rc.to_tuples(None);
 
         if let Err(name) = self
             .cargo
