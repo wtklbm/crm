@@ -2,7 +2,11 @@
 //!
 //! 该模块用来解析 `toml` 文件，可以对 `toml` 文件进行更改，当更改完成之后可以再序列化为 `toml` 字符串。
 
-use std::{fs, path::Path, process};
+use std::{
+    fs::{create_dir_all, write},
+    path::Path,
+    process,
+};
 
 use toml_edit::{Document, Table, TomlError};
 
@@ -40,7 +44,13 @@ impl Toml {
 
     /// 写入到文件中
     pub fn write<P: AsRef<Path>>(&self, path: P) {
-        if let Err(e) = fs::write(path, self.to_string()) {
+        let parent = path.as_ref().parent().unwrap();
+
+        if !parent.is_dir() {
+            create_dir_all(parent).unwrap();
+        }
+
+        if let Err(e) = write(path, self.to_string()) {
             to_out(format!("写入文件失败:\n  {}", e));
             process::exit(-1);
         }
