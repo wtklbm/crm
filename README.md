@@ -53,6 +53,36 @@ $ crm
 
 
 
+## 在项目中使用来自不同镜像源的依赖
+
+`crm` 在配置镜像源时，会默认在 `~/.cargo/config` 中多增加一个 `registries` 属性对象，通过增加该属性对象，您就可以在项目中应用来自于不同镜像源的依赖。比如您在使用官方镜像源时，可以通过在项目的 `Cargo.toml` 文件中指定依赖的 `registry` 属性来使用不同的国内镜像源。如果您已经在使用国内镜像源了，那么也可以通过修改 `registry` 属性的方式来切换到其他的国内镜像源。以下是一个示例。
+
+
+
+
+```toml
+# Cargo.toml
+
+# 使用官方镜像源时，`registry` 属性可选的值为：`rustcc`, `sjtu`, `tuna`, `ustc`, `rsproxy`
+# 如果您已经使用 `crm` 切换到了 `rsproxy` 镜像源，那么 `registry` 属性可选的值则为其他 4 种国内镜像：`rustcc`, `sjtu`, `tuna`, `ustc`
+# 以此类推
+# 值得注意的是，在使用国内镜像源时，您无法直接通过修改 `registry` 属性的方式使用官方镜像源
+# 如果您想使用官方镜像源，那么请在终端执行 `crm default` 来切换到官方镜像
+
+[dependencies]
+# 使用 `ustc` 国内镜像来下载 `log` 依赖
+log = {version = "0.4.12", registry = "ustc"}
+
+# 使用 `sjtu` 国内镜像来下载 `lazy_static` 依赖
+lazy_static = {version = "1.4.0", registry = "sjtu"}
+```
+
+
+
+> NOTE：如果您刚安装 `crm`，那么请在终端执行一次：`crm default`，然后就可以在项目的 `Cargo.toml` 文件中配置 `registry` 属性了。
+
+
+
 ## 注意事项
 
 1. `v0.1.0` 版本以下的 `.crmrc` 配置文件和最新版本的配置文件并不能相互兼容，如果您正在使用小于 `v0.1.0` 的版本，当您更新到最新版本时，请手动删除 `~/.crmrc` 文件
