@@ -36,7 +36,14 @@ impl Registry {
     pub fn select(&mut self, name: Option<&String>) {
         let name = is_registry_name(name).trim();
 
-        if let Err(name) = self.cargo.use_registry(name, self.rc.get(name)) {
+        // 收集需要添加 `[registries.xxx]` 属性的镜像元祖数组
+        let exclude_name = if name.eq(RUST_LANG) { None } else { Some(name) };
+        let remaining_registries = self.rc.to_tuples(exclude_name);
+
+        if let Err(name) = self
+            .cargo
+            .use_registry(name, self.rc.get(name), remaining_registries)
+        {
             let keys = self.rc.to_key_string();
 
             if keys.is_empty() {
