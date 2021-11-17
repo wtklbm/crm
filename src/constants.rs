@@ -5,6 +5,18 @@
 /// `${CARGO_HOME}/.cargo/config` 文件中的 `[source]` 属性
 pub const SOURCE: &str = "source";
 
+pub const NET: &str = "net";
+
+/// 由于网络原因，在项目添加 `dependencies` 后总显示无法连接 `github.com` 。但是终端中却可以正常使用 `git clone` 命令。
+/// 如果有遇到同样情况的，可以在 `$HOME/.cargo/config` 文件中内写入：
+///
+/// ```toml
+/// [net]
+/// git-fetch-with-cli = true
+/// ```
+/// 保存之后就解决了 `cargo` 无法连接 `github.com` 的错误
+pub const GIT_FETCH_WITH_CLI: &str = "git-fetch-with-cli";
+
 /// `${CARGO_HOME}/.cargo/config` 文件中的 `[source.crates-io]` 属性
 pub const CRATES_IO: &str = "crates-io";
 
