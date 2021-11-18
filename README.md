@@ -90,6 +90,19 @@ lazy_static = {version = "1.4.0", registry = "sjtu"}
 3. `crm` 默认会在 `~/.cargo/config` 文件中增加一个 `env.git-fetch-with-cli` 属性，值为 `true`，在使用 `crm` 时您无法删除该选项，如果您不想使用 `Git` 可执行文件进行 `Git` 操作，请手动修改 `~/.cargo/config` 文件并将 `git-fetch-with-cli` 的值修改为 `false`
 
 
+
+## Others
+
+### rust-library-chinese
+
+`rust-library-chinese` 是 Rust 核心库和标准库的源码级中文翻译，可以用作 IDE 工具的中文智能提示，也可以基于翻译好的内容生成 Rust 中文 API 文档。
+
+- [从 Github 访问](https://github.com/wtklbm/rust-library-i18n)
+- [从 Gitee 访问](https://gitee.com/wtklbm/rust-library-chinese)
+
+
+
+
 ## LICENSE
 
 MIT OR Apache-2.0
