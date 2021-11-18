@@ -48,7 +48,10 @@ impl CargoConfig {
                 verify_field_exists(data, SOURCE);
                 verify_field_exists(data, REGISTRIES);
                 verify_field_exists(data, NET);
-                data[NET][GIT_FETCH_WITH_CLI] = value(true);
+
+                if data[NET][GIT_FETCH_WITH_CLI].is_none() {
+                    data[NET][GIT_FETCH_WITH_CLI] = value(true);
+                }
 
                 CargoConfig { data: config }
             }
