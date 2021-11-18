@@ -87,6 +87,7 @@ lazy_static = {version = "1.4.0", registry = "sjtu"}
 
 1. `v0.1.0` 版本以下的 `.crmrc` 配置文件和最新版本的配置文件并不能相互兼容，如果您正在使用小于 `v0.1.0` 的版本，当您更新到最新版本时，请手动删除 `~/.crmrc` 文件
 2. `crm` 会修改 `~/.cargo/config` 文件来进行镜像源的切换，如果您使用的是小于 `v0.1.3` 的版本，那么当您使用 `crm` 切换镜像时，`~/.cargo/config` 文件中的文档注释会被删除并且永远无法恢复，如果您在 `~/.cargo/config` 文件中保存了笔记或者文档，请尽快更新到最新版，在最新版中，对此进行了优化，不再自动删除文档注释 (除修改的字段外)
+3. `crm` 默认会在 `~/.cargo/config` 文件中增加一个 `env.git-fetch-with-cli` 属性，值为 `true`，在使用 `crm` 时您无法删除该选项，如果您不想使用 `Git` 可执行文件进行 `Git` 操作，请手动修改 `~/.cargo/config` 文件并将 `git-fetch-with-cli` 的值修改为 `false`
 
 
 ## LICENSE
