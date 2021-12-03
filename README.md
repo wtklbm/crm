@@ -27,9 +27,16 @@ $ cargo install crm
 您可以从 Arch Linux 用户仓库安装它，感谢 [taotieren](https://github.com/taotieren)。
 
 - <https://aur.archlinux.org/packages/crm>
+
+```bash
+yay -S crm
+```
+
 - <https://aur.archlinux.org/packages/crm-git>
 
-
+```bash
+yay -S crm-git
+```
 
 ## 使用
 
