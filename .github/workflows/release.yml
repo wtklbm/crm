@@ -1,0 +1,125 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  # 为每个操作系统构建源代码
+  github_build:
+    name: Build release binaries
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            name: crm_windows_amd64.tar.gz
+
+          # # 以下构建会报错：
+          # # Error: failed to run custom build command for `ring v0.16.20`
+          # - target: aarch64-pc-windows-msvc
+          #   os: windows-latest
+          #   name: crm_windows_arm64.tar.gz
+
+          # macOS
+          - target: x86_64-apple-darwin
+            os: macOS-latest
+            name: crm_darwin_amd64.tar.gz
+
+          # - target: aarch64-apple-darwin
+          #   os: macOS-latest
+          #   name: crm_darwin_arm64.tar.gz
+
+          # Linux
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            name: crm_linux_amd64.tar.gz
+
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    steps:
+      - name: Setup | Checkout
+        # https://github.com/actions/checkout
+        uses: actions/checkout@v2
+
+      # 在构建时缓存文件
+      - name: Setup | Cache Cargo
+        # https://github.com/actions/cache/blob/main/examples.md#rust---cargo
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      # 在 `rustup` 帮助下安装 Rust 工具链
+      - name: Setup | Rust
+        # https://github.com/actions-rs/toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          profile: minimal
+          target: ${{ matrix.target }}
+
+      - name: Build | Build
+        # https://github.com/actions-rs/cargo
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target ${{ matrix.target }}
+          use-cross: ${{ matrix.os == 'ubuntu-latest' }}
+
+      - name: Post Build | Prepare artifacts [Windows]
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd target/${{ matrix.target }}/release
+          strip crm.exe
+          7z a ../../../${{ matrix.name }} crm.exe
+          cd -
+      - name: Post Build | Prepare artifacts [-nix]
+        if: matrix.os != 'windows-latest'
+        run: |
+          cd target/${{ matrix.target }}/release
+          # TODO: investigate better cross platform stripping
+          strip crm || true
+          tar czvf ../../../${{ matrix.name }} crm
+          cd -
+      - name: Deploy | Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.name }}
+
+  # 使用 Rust 构建目标和发行说明创建 GitHub 发行版
+  github_release:
+    name: Create GitHub Release
+    needs: github_build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup | Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: release-dist
+
+      - name: Setup | Checksums
+        run: |
+          ls -lha release-dist
+          for file in release-dist/**/*; do openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"; done
+
+      - name: Publish
+        # https://github.com/softprops/action-gh-release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-dist/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
