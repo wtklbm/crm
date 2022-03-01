@@ -1,6 +1,6 @@
 # crm (Cargo registry manager)
 
-[`crm`](https://github.com/wtklbm/crm) 是一个在终端运行的镜像管理程序，能够对 `Cargo` 镜像源进行简单的添加、修改、删除操作，并能帮助您快速的切换不同的 `Cargo` 镜像源。`crm` 内置了 5 种国内 (中国) 镜像源，它们分别是：`rustcc`, `sjtu`, `tuna`, `ustc`, `rsproxy`。
+[`crm`](https://github.com/wtklbm/crm) 是一个在终端运行的镜像管理程序，能够对 `Cargo` 镜像源进行简单的添加、修改、删除操作，并能帮助您快速的切换不同的 `Cargo` 镜像源。`crm` 内置了多种国内 (中国) 镜像源，它们分别是：`sjtu`, `tuna`, `ustc`, `rsproxy`，`bfsu`, `nju`, `hit`。
 
 
 在使用 Rust 语言做开发时，使用 Rust 官方镜像源进行 `cargo build` 的速度非常的慢，可能会因为网络的原因导致依赖下载超时而无法完成编译。为了能够在最少的时间内完成打包操作，一般会使用国内镜像源来代替官方镜像。
@@ -83,8 +83,8 @@ $ crm
 ```toml
 # Cargo.toml
 
-# 使用官方镜像源时，`registry` 属性可选的值为：`rustcc`, `sjtu`, `tuna`, `ustc`, `rsproxy`
-# 如果您已经使用 `crm` 切换到了 `rsproxy` 镜像源，那么 `registry` 属性可选的值则为其他 4 种国内镜像：`rustcc`, `sjtu`, `tuna`, `ustc`
+# 使用官方镜像源时，`registry` 属性可选的值为： `sjtu`, `tuna`, `ustc`, `rsproxy`, `bfsu`, `nju`, `hit`
+# 如果您已经使用 `crm` 切换到了 `rsproxy` 镜像源，那么 `registry` 属性可选的值则为其他国内镜像：`sjtu`, `tuna`, `ustc`, `bfsu`, `nju`, `hit`
 # 以此类推
 # 值得注意的是，在使用国内镜像源时，您无法直接通过修改 `registry` 属性的方式使用官方镜像源
 # 如果您想使用官方镜像源，那么请在终端执行 `crm default` 来切换到官方镜像
@@ -100,25 +100,6 @@ lazy_static = {version = "1.4.0", registry = "sjtu"}
 
 
 > NOTE：如果您刚安装 `crm`，那么请在终端执行一次：`crm default`，然后就可以在项目的 `Cargo.toml` 文件中配置 `registry` 属性了。
-
-
-
-## 可选镜像源
-
-下面提供了一些没有被内置到 `crm` 中的可选镜像源。您可以手动执行命令，将他们保存到 `crm` 镜像列表，以备后续使用。
-
-```bash
-# 在终端执行
-
-# 北京外国语大学
-$ crm save bfsu "https://mirrors.bfsu.edu.cn/git/crates.io-index.git" "https://crates.io/api/v1/crates"
-
-# 南京大学
-$ crm save nju "https://mirror.nju.edu.cn/git/crates.io-index.git" "https://crates.io/api/v1/crates"
-
-# 哈尔滨工业大学
-$ crm save hit "https://mirrors.hit.edu.cn/crates.io-index.git" "https://crates.io/api/v1/crates"
-```
 
 
 
