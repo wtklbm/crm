@@ -83,11 +83,6 @@ pub const CRMRC_FILE: &str = r#"
 registry = "https://github.com/rust-lang/crates.io-index"
 dl = "https://crates.io/api/v1/crates"
 
-# `rustcc` 社区
-[source.rustcc]
-registry = "git://crates.rustcc.cn/crates.io-index"
-dl = "https://crates.rustcc.cn/api/v1/crates"
-
 # 上海交通大学
 [source.sjtu]
 registry = "https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index"
@@ -107,4 +102,19 @@ dl = "https://crates-io.proxy.ustclug.org/api/v1/crates"
 [source.rsproxy]
 registry = "https://rsproxy.cn/crates.io-index"
 dl = "https://rsproxy.cn/api/v1/crates"
+
+# 北京外国语大学
+[source.bfsu]
+registry = "https://mirrors.bfsu.edu.cn/git/crates.io-index.git"
+dl = "https://crates.io/api/v1/crates"
+
+# 南京大学
+[source.nju]
+registry = "https://mirror.nju.edu.cn/git/crates.io-index.git"
+dl = "https://crates.io/api/v1/crates"
+
+# 哈尔滨工业大学
+[source.hit]
+registry = "https://mirrors.hit.edu.cn/crates.io-index.git"
+dl = "https://crates.io/api/v1/crates"
 "#;
