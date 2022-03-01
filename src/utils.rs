@@ -220,6 +220,38 @@ pub fn exec_command(command: &str, cwd: Option<&String>) -> io::Result<Output> {
     }
 }
 
+/// 获取最新的版本
+pub fn get_newest_version() -> Option<String> {
+    let url = "https://crates.io/api/v1/crates/crm";
+
+    match ureq::get(url).timeout(Duration::from_secs(10)).call() {
+        Ok(res) => {
+            let status = res.status();
+
+            if status >= 400 {
+                return None;
+            }
+
+            match res.into_string() {
+                Ok(body) => match body.find("\"newest_version\"") {
+                    Some(idx) => {
+                        let sub_str = &body[idx + 18..idx + 38];
+                        let version = &sub_str[..sub_str.find("\"").unwrap()];
+
+                        return Some(version.to_string());
+                    }
+
+                    None => None,
+                },
+
+                Err(_) => None,
+            }
+        }
+
+        Err(_) => None,
+    }
+}
+
 pub fn not_command(command: &str) {
     let r = r#"
   crm best                    评估网络延迟并自动切换到最优的镜像
@@ -233,6 +265,8 @@ pub fn not_command(command: &str) {
   crm test [name]             下载测试包以评估网络延迟
   crm update [args]           使用官方镜像执行 "cargo update"
   crm use <name>              切换为要使用的镜像
+  crm version                 查看当前版本
+  crm check-update            检测版本更新
 "#;
 
     to_out(format!("{} 命令无效。参考:\n{}", command, r));
