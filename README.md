@@ -67,6 +67,8 @@ $ crm
   crm test [name]             下载测试包以评估网络延迟
   crm update [args]           使用官方镜像执行 "cargo update"
   crm use <name>              切换为要使用的镜像
+  crm version                 查看当前版本
+  crm check-update            检测版本更新
 ```
 
 
