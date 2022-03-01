@@ -15,6 +15,8 @@
 //!   - `crm test [name]`:             下载测试包以评估网络延迟
 //!   - `crm update [args]`:           使用官方镜像执行 `cargo update`
 //!   - `crm use <name>`:              切换为要使用的镜像
+//!   - `crm version`:                 查看当前版本
+//!   - `crm check-update`:            检测版本更新
 //!
 //! 其中，`save`、`remove` 命令只修改 `${HOME}/.crmrc` 配置文件，
 //! 而不对 `${CARGO_HOME}/.cargo/config` 文件做任何的操作。
@@ -24,8 +26,9 @@
 use std::env::args_os;
 
 use crate::{
+    constants::APP_VERSION,
     registry::Registry,
-    utils::{not_command, to_out},
+    utils::{get_newest_version, not_command, to_out},
 };
 
 type Args = (String, Vec<String>);
@@ -95,6 +98,25 @@ pub fn handle_command((command, args): Args) {
                 Some(addr) => to_out(format!("{}: {}", name, addr)),
                 None => to_out(format!("{}", name)),
             };
+        }
+
+        // 查看当前的版本
+        "version" => {
+            println!("  crm v{APP_VERSION}");
+        }
+
+        // 检查版本更新
+        "check-update" => {
+            match get_newest_version() {
+                Some(newest) => {
+                    if newest != APP_VERSION {
+                        return println!("  检测到新版本: {newest}，请切换到官方镜像源以执行更新");
+                    }
+                }
+                None => {}
+            };
+
+            println!("  暂无更新");
         }
 
         command => {
