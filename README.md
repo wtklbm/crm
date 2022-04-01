@@ -53,6 +53,8 @@ yay -S crm-git
 #  - `crm install` 对应 `cargo install`
 #  - `crm publish` 对应 `cargo publish`
 #  - `crm update` 对应 `cargo update`
+#
+# `crm test` 命令一般用于进行全量测试，而 `crm best` 是切换到最优镜像的快速方式
 
 $ crm
 
