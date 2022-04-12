@@ -74,6 +74,9 @@ $ crm
 ```
 
 
+根据 [反馈](https://github.com/wtklbm/crm/issues/11)，并不建议您使用 `ustc` 镜像源，它会限制并发。
+
+
 
 ## 在项目中使用来自不同镜像源的依赖
 
