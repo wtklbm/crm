@@ -51,7 +51,7 @@ impl RuntimeConfig {
         };
 
         let extend = RuntimeConfig::parse(&data);
-        let default = RuntimeConfig::parse(&CRMRC_FILE.to_string());
+        let default = RuntimeConfig::parse(CRMRC_FILE);
 
         RuntimeConfig {
             extend: RuntimeConfig::extract_to_map(&extend),
@@ -72,13 +72,13 @@ impl RuntimeConfig {
 
     /// 将运行时配置中的镜像列表转换为字符串
     pub fn to_string(&self, current: &String, sep: Option<&str>) -> String {
-        let sep = if let None = sep { "" } else { sep.unwrap() };
+        let sep = if sep.is_none() { "" } else { Option::unwrap(sep) };
 
         self.iter()
             .fold(String::new(), |mut memo, (k, v)| {
                 let p = status_prefix(k, current);
                 let k = append_end_spaces(k, None);
-                memo.push_str(&format! {"{}{}{}{}\n", p, k, sep, v.registry });
+                memo.push_str(format! {"{}{}{}{}\n", p, k, sep, v.registry }.as_str());
                 memo
             })
             .trim_end()
@@ -152,10 +152,10 @@ impl RuntimeConfig {
     }
 
     /// 将字符串解析为 `Toml` 对象
-    fn parse(data: &String) -> Toml {
-        let config = Toml::parse(&data);
+    fn parse(data: &str) -> Toml {
+        let config = Toml::parse(data);
 
-        if let Err(_) = config {
+        if config.is_err() {
             to_out(format!("解析 {} 文件失败，{}", CRMRC_PATH, PLEASE_TRY));
             process::exit(-1);
         }
@@ -229,5 +229,11 @@ impl RuntimeConfig {
             source[k][REGISTRY] = value(registry.to_string());
             source[k][DL] = value(dl.to_string());
         });
+    }
+}
+
+impl Default for RuntimeConfig {
+    fn default() -> Self {
+        Self::new()
     }
 }
