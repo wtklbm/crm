@@ -122,10 +122,9 @@ impl CargoConfig {
         };
 
         // 从配置文件中根据镜像名获取镜像地址
-        let addr = match &data[SOURCE][name][REGISTRY].as_str() {
-            Some(v) => Some(v.to_string()),
-            None => None,
-        };
+        let addr = data[SOURCE][name][REGISTRY]
+            .as_str()
+            .map(|v| v.to_string());
 
         (name.to_string(), addr)
     }
@@ -165,7 +164,7 @@ impl CargoConfig {
 
     /// 在 `Cargo` 配置文件中添加新的 `[registries.xxx]` 镜像属性，并为其指定 `index` 属性。
     /// `index` 属性是强制添加的，`${CARGO_HOME}/.cargo/config` 文件中如果存在则会覆盖。
-    fn append_registries(&mut self, remaining_registries: &Vec<(&str, &str)>) {
+    fn append_registries(&mut self, remaining_registries: &[(&str, &str)]) {
         remaining_registries
             .iter()
             .for_each(|(registry_name, registry_addr)| {
@@ -198,7 +197,7 @@ impl CargoConfig {
         self.remove_attribute(SOURCE, registry_name);
     }
 
-    fn remove_old_registries(&mut self, remaining_registries: &Vec<(&str, &str)>) {
+    fn remove_old_registries(&mut self, remaining_registries: &[(&str, &str)]) {
         remaining_registries.iter().for_each(|(registry_name, _)| {
             self.remove_attribute(REGISTRIES, registry_name);
         });
@@ -223,7 +222,7 @@ impl CargoConfig {
 
         // 删除老的镜像属性
         self.remove_old_registry(&old_name);
-        self.remove_old_registries(&vec![(registry_name, "")]);
+        self.remove_old_registries(&[(registry_name, "")]);
         self.remove_old_registries(&remaining_registries);
         self.append_registries(&remaining_registries);
 
@@ -238,5 +237,11 @@ impl CargoConfig {
         );
 
         Ok(())
+    }
+}
+
+impl Default for CargoConfig {
+    fn default() -> Self {
+        Self::new()
     }
 }
