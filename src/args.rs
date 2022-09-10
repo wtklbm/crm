@@ -44,7 +44,7 @@ pub fn parse_args() -> Args {
 
     let command = args_os.next();
 
-    if let None = command {
+    if command.is_none() {
         not_command("");
     }
 
@@ -96,7 +96,7 @@ pub fn handle_command((command, args): Args) {
 
             match addr {
                 Some(addr) => to_out(format!("{}: {}", name, addr)),
-                None => to_out(format!("{}", name)),
+                None => to_out(name),
             };
         }
 
