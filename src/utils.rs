@@ -26,7 +26,7 @@ pub fn home_dir() -> PathBuf {
 pub fn cargo_home() -> PathBuf {
     match env::var_os(CARGO_HOME) {
         Some(value) => PathBuf::from(value),
-        None => home_dir().clone().join(DOT_CARGO),
+        None => home_dir().join(DOT_CARGO),
     }
 }
 
@@ -75,7 +75,7 @@ pub fn append_end_spaces(value: &str, total_len: Option<usize>) -> String {
     let size = if total_len.is_none() {
         15
     } else {
-        total_len.unwrap()
+        Option::unwrap(total_len)
     };
 
     let pad = if value.len() < size {
@@ -87,7 +87,7 @@ pub fn append_end_spaces(value: &str, total_len: Option<usize>) -> String {
     format!("{}{}", value, pad)
 }
 
-pub fn request(url: &String) -> Option<u128> {
+pub fn request(url: &str) -> Option<u128> {
     let time = SystemTime::now();
 
     match ureq::get(url).timeout(Duration::from_secs(10)).call() {
@@ -100,7 +100,7 @@ pub fn request(url: &String) -> Option<u128> {
 
             if status >= 300 {
                 return match res.header("location") {
-                    Some(v) => request(&v.to_string()),
+                    Some(v) => request(v),
                     None => None,
                 };
             }
@@ -130,7 +130,7 @@ pub fn network_delay(
                 None => None,
             };
 
-            if let Err(_) = t.send((v.0.to_string(), date)) {
+            if t.send((v.0.to_string(), date)).is_err() {
                 process::exit(0);
             }
         });
@@ -207,17 +207,13 @@ pub fn exec_command(command: &str, cwd: Option<&String>) -> io::Result<Output> {
         None => env::current_dir().unwrap(),
     };
 
-    match Command::new(program)
+    Command::new(program)
         .current_dir(cwd)
         .args(&[arg_c, command])
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .output()
-    {
-        Ok(output) => Ok(output),
-        Err(e) => Err(e),
-    }
 }
 
 /// 获取最新的版本
@@ -236,9 +232,9 @@ pub fn get_newest_version() -> Option<String> {
                 Ok(body) => match body.find("\"newest_version\"") {
                     Some(idx) => {
                         let sub_str = &body[idx + 18..idx + 38];
-                        let version = &sub_str[..sub_str.find("\"").unwrap()];
+                        let version = &sub_str[..sub_str.find('\"').unwrap()];
 
-                        return Some(version.to_string());
+                        Some(version.to_string())
                     }
 
                     None => None,
