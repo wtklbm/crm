@@ -62,12 +62,12 @@ impl Registry {
     pub fn remove(&mut self, name: Option<&String>) {
         let name = is_registry_name(name).trim();
 
-        if let Some(_) = self.rc.get_default(name) {
+        if self.rc.get_default(name).is_some() {
             to_out("请不要删除内置镜像");
             process::exit(-1);
         }
 
-        if let None = self.rc.get_extend(name) {
+        if self.rc.get_extend(name).is_none() {
             to_out(format!("删除失败，{} 镜像不存在", name));
             process::exit(-1);
         }
@@ -96,10 +96,7 @@ impl Registry {
         let (name, addr) = CargoConfig::new().current();
         let addr = match addr {
             Some(addr) => Some(addr),
-            None => match self.rc.get(&name) {
-                Some(addr) => Some(addr.registry.clone()),
-                None => None,
-            },
+            None => self.rc.get(&name).map(|addr| addr.registry.clone()),
         };
 
         (name, addr)
@@ -191,7 +188,7 @@ impl Registry {
     }
 
     /// 使用官方镜像源执行命令
-    fn exec(&mut self, command: &String) {
+    fn exec(&mut self, command: &str) {
         let (registry_name, _) = self.current();
         let is_default_registry = registry_name.eq(RUST_LANG);
 
@@ -199,7 +196,7 @@ impl Registry {
             self.default();
         }
 
-        if let Err(e) = exec_command(&command, None) {
+        if let Err(e) = exec_command(command, None) {
             to_out(e);
         };
 
@@ -224,5 +221,11 @@ impl Registry {
         let args = if args.is_empty() { "--help" } else { args };
 
         self.exec(&format!("{} install {}", CARGO, args));
+    }
+}
+
+impl Default for Registry {
+    fn default() -> Self {
+        Self::new()
     }
 }
