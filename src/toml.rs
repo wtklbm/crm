@@ -38,7 +38,7 @@ impl Toml {
     }
 
     /// 转换为字符串
-    pub fn to_string(&self) -> String {
+    pub fn toml_string(&self) -> String {
         self.doc.to_string_in_original_order().trim().to_string()
     }
 
@@ -50,7 +50,7 @@ impl Toml {
             create_dir_all(parent).unwrap();
         }
 
-        if let Err(e) = write(path, self.to_string()) {
+        if let Err(e) = write(path, self.toml_string()) {
             to_out(format!("写入文件失败:\n  {}", e));
             process::exit(-1);
         }
