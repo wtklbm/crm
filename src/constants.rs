@@ -117,4 +117,9 @@ dl = "https://crates.io/api/v1/crates"
 [source.hit]
 registry = "https://mirrors.hit.edu.cn/crates.io-index.git"
 dl = "https://crates.io/api/v1/crates"
+
+# Rust 中国开源社区
+[source.rustpub]
+registry = "https://infra.rust-lang.pub/crates.io-index"
+dl = "https://crates.io/api/v1/crates"
 "#;
