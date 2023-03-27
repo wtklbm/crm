@@ -64,12 +64,12 @@ impl Registry {
 
         if self.rc.get_default(name).is_some() {
             to_out("请不要删除内置镜像");
-            process::exit(-1);
+            process::exit(11);
         }
 
         if self.rc.get_extend(name).is_none() {
             to_out(format!("删除失败，{} 镜像不存在", name));
-            process::exit(-1);
+            process::exit(12);
         }
 
         self.rc.remove(name);
@@ -150,7 +150,7 @@ impl Registry {
             Some(name) => {
                 if self.rc.get(name).is_none() {
                     to_out(format!("测试失败，{} 镜像不存在", name));
-                    process::exit(-1);
+                    process::exit(13);
                 }
 
                 vec![(name.to_string(), self.to_url(name))]
