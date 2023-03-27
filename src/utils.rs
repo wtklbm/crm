@@ -47,7 +47,7 @@ pub fn get_cargo_config() -> String {
 pub fn is_registry_name(name: Option<&String>) -> &str {
     if name.is_none() {
         to_out("请输入正确的镜像名");
-        process::exit(-1);
+        process::exit(1);
     }
 
     name.unwrap().as_str()
@@ -56,7 +56,7 @@ pub fn is_registry_name(name: Option<&String>) -> &str {
 pub fn is_registry_addr(addr: Option<&String>) -> &str {
     if addr.is_none() {
         to_out("请输入正确的镜像地址");
-        process::exit(-1);
+        process::exit(2);
     }
 
     addr.unwrap().as_str()
@@ -65,7 +65,7 @@ pub fn is_registry_addr(addr: Option<&String>) -> &str {
 pub fn is_registry_dl(dl: Option<&String>) -> &str {
     if dl.is_none() {
         to_out("请输入正确的 dl。\n  每一个镜像源都是一个 Git 存储库，而在该存储库的根目录下有一个 config.json 文件，\n  其中，dl 属性是 config.json 文件中的一个字段。");
-        process::exit(-1);
+        process::exit(3);
     }
 
     dl.unwrap().as_str()
@@ -266,5 +266,5 @@ pub fn not_command(command: &str) {
 "#;
 
     to_out(format!("{} 命令无效。参考:\n{}", command, r));
-    process::exit(-1);
+    process::exit(4);
 }
