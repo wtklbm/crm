@@ -5,6 +5,10 @@
 //!
 //! 目前可接收的运行时参数主要包括:
 //!   - `crm best`:                    评估网络延迟并自动切换到最优的镜像
+//!   - `crm best git`:                仅评估 git 镜像源
+//!   - `crm best sparse`:             仅评估支持 sparse 协议的镜像源
+//!   - `crm best git-download`:       仅评估能够快速下载软件包的 git 镜像源 (推荐使用)
+//!   - `crm best sparse-download`:    仅评估能够快速下载软件包且支持 sparse 协议的镜像源 (推荐使用)
 //!   - `crm current`:                 获取当前所使用的镜像
 //!   - `crm default`:                 恢复为官方默认镜像
 //!   - `crm install [args]`:          使用官方镜像执行 `cargo install`
@@ -69,9 +73,6 @@ pub fn handle_command((command, args): Args) {
         // 恢复默认镜像
         "default" => r.default(),
 
-        // 评估网络延迟并自动切换到最优的镜像
-        "best" => r.best(),
-
         // 切换镜像
         "use" => r.select(args.get(0)),
 
@@ -125,6 +126,9 @@ pub fn handle_command((command, args): Args) {
             let dl = args.get(2);
 
             match command {
+                // 评估网络延迟并自动切换到最优的镜像
+                "best" => r.best(name),
+
                 // 添加/更新镜像
                 "save" => r.save(name, addr, dl),
 
