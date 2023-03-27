@@ -159,6 +159,7 @@ impl Registry {
                 .rc
                 .registry_names()
                 .iter()
+                .filter(|name| !name.ends_with("-sparse"))
                 .map(|name| (name.to_string(), self.to_url(name)))
                 .collect(),
         };
