@@ -90,7 +90,7 @@ pub fn append_end_spaces(value: &str, total_len: Option<usize>) -> String {
 pub fn request(url: &str) -> Option<u128> {
     let time = SystemTime::now();
 
-    match ureq::get(url).timeout(Duration::from_secs(10)).call() {
+    match ureq::get(url).timeout(Duration::from_secs(5)).call() {
         Ok(res) => {
             let status = res.status();
 
