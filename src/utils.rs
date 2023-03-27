@@ -270,6 +270,10 @@ pub fn get_newest_version() -> Option<String> {
 pub fn not_command(command: &str) {
     let r = r#"
   crm best                    评估网络延迟并自动切换到最优的镜像
+    crm best git              仅评估 git 镜像源
+    crm best sparse           仅评估支持 sparse 协议的镜像源
+    crm best git-download     仅评估能够快速下载软件包的 git 镜像源 (推荐使用)
+    crm best sparse-download  仅评估能够快速下载软件包且支持 sparse 协议的镜像源 (推荐使用)
   crm current                 获取当前所使用的镜像
   crm default                 恢复为官方默认镜像
   crm install [args]          使用官方镜像执行 "cargo install"
