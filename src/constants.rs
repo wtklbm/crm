@@ -88,14 +88,19 @@ dl = "https://crates.io/api/v1/crates"
 registry = "https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index"
 dl = "https://mirror.sjtu.edu.cn/crates.io/crates/{crate}/{crate}-{version}.crate"
 
-# 清华大学
-[source.tuna]
-registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"
-dl = "https://crates.io/api/v1/crates"
+# 上海交通大学 - sparse
+[source.sjtu-sparse]
+registry = "sparse+https://mirrors.sjtug.sjtu.edu.cn/crates.io-index/"
+dl = "https://mirror.sjtu.edu.cn/crates.io/crates/{crate}/{crate}-{version}.crate"
 
 # 中科大
 [source.ustc]
 registry = "git://mirrors.ustc.edu.cn/crates.io-index"
+dl = "https://crates-io.proxy.ustclug.org/api/v1/crates"
+
+# 中科大 - sparse
+[source.ustc-sparse]
+registry = "sparse+https://mirrors.ustc.edu.cn/crates.io-index/"
 dl = "https://crates-io.proxy.ustclug.org/api/v1/crates"
 
 # 字节跳动
@@ -103,9 +108,29 @@ dl = "https://crates-io.proxy.ustclug.org/api/v1/crates"
 registry = "https://rsproxy.cn/crates.io-index"
 dl = "https://rsproxy.cn/api/v1/crates"
 
+# 字节跳动 - sparse
+[source.rsproxy-sparse]
+registry = "sparse+https://rsproxy.cn/index/"
+dl = "https://rsproxy.cn/api/v1/crates"
+
+# 清华大学
+[source.tuna]
+registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"
+dl = "https://crates.io/api/v1/crates"
+
+# 清华大学 - sparse
+[source.tuna-sparse]
+registry = "sparse+https://mirrors.tuna.tsinghua.edu.cn/crates.io-index/"
+dl = "https://crates.io/api/v1/crates"
+
 # 北京外国语大学
 [source.bfsu]
 registry = "https://mirrors.bfsu.edu.cn/git/crates.io-index.git"
+dl = "https://crates.io/api/v1/crates"
+
+# 北京外国语大学 - sparse
+[source.bfsu-sparse]
+registry = "sparse+https://mirrors.bfsu.edu.cn/crates.io-index/"
 dl = "https://crates.io/api/v1/crates"
 
 # 南京大学
@@ -116,10 +141,5 @@ dl = "https://crates.io/api/v1/crates"
 # 哈尔滨工业大学
 [source.hit]
 registry = "https://mirrors.hit.edu.cn/crates.io-index.git"
-dl = "https://crates.io/api/v1/crates"
-
-# Rust 中国开源社区
-[source.rustpub]
-registry = "https://infra.rust-lang.pub/crates.io-index"
 dl = "https://crates.io/api/v1/crates"
 "#;
