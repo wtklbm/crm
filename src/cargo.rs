@@ -25,7 +25,7 @@ fn verify_field_exists(data: &mut Table, key: &str) {
         data[key] = table();
     } else if !value.is_table() {
         field_eprint(key, TABLE);
-        process::exit(-1);
+        process::exit(5);
     }
 }
 
@@ -61,7 +61,7 @@ impl CargoConfig {
                     "{} 文件解析失败，{}",
                     CARGO_CONFIG_PATH, PLEASE_TRY
                 ));
-                process::exit(-1);
+                process::exit(6);
             }
         }
     }
@@ -80,7 +80,7 @@ impl CargoConfig {
             data[SOURCE][CRATES_IO] = table();
         } else if !crates_io.is_table() {
             field_eprint(CRATES_IO, TABLE);
-            process::exit(-1);
+            process::exit(7);
         }
     }
 
@@ -114,7 +114,7 @@ impl CargoConfig {
                 Some(name) => name,
                 None => {
                     field_eprint(REPLACE_WITH, STRING);
-                    process::exit(-1);
+                    process::exit(8);
                 }
             }
         } else {
@@ -140,7 +140,7 @@ impl CargoConfig {
             source[registry_name] = table();
         } else if !registry.is_table() {
             field_eprint(registry_name, TABLE);
-            process::exit(-1);
+            process::exit(9);
         }
 
         let attr = match key {
@@ -148,7 +148,7 @@ impl CargoConfig {
             REGISTRIES => "index",
             _ => {
                 to_out(format!("{:?} 不是预期的属性名", key));
-                process::exit(-1);
+                process::exit(10);
             }
         };
 
