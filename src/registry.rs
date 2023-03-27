@@ -2,7 +2,7 @@
 //!
 //! 该模块用于操作镜像。包括简单的增删改查操作。
 
-use std::process;
+use std::{collections::HashSet, process};
 
 use crate::{
     cargo::CargoConfig,
@@ -107,9 +107,77 @@ impl Registry {
         self.select(Some(&RUST_LANG.to_string()));
     }
 
+    fn delay_tester<'a, I, P, F>(
+        &self,
+        iter: I,
+        predicate: P,
+        conversion_url: F,
+    ) -> Vec<(String, Option<u128>)>
+    where
+        I: Iterator<Item = &'a String>,
+        P: FnMut(&&'a String) -> bool,
+        F: FnMut(&'a String) -> (String, Option<String>),
+    {
+        let urls: Vec<(String, Option<String>)> =
+            iter.filter(predicate).map(conversion_url).collect();
+
+        network_delay(urls, Some(1), true)
+    }
+
     /// 评估网络延迟并自动切换到最优的镜像
-    pub fn best(&mut self) {
-        let tested = self.test_download_status(None, Some(1));
+    pub fn best(&mut self, mode: Option<&String>) {
+        let names = self.rc.registry_names();
+        let iter = names.iter();
+        let dld = ["sjtu", "ustc", "rsproxy"].iter().map(ToString::to_string);
+        const SPARSE: &str = "-sparse";
+
+        let tested = match mode {
+            Some(mode) => match mode.to_lowercase().as_str() {
+                // 测试所有带有 `sparse` 后缀的镜像源
+                "sparse" => self.delay_tester(
+                    iter,
+                    |name| name.ends_with(SPARSE),
+                    |name| (name.to_string(), self.to_connected_url(name)),
+                ),
+
+                // 测试所有 git 镜像源
+                "git" => self.delay_tester(
+                    iter,
+                    |name| !name.ends_with(SPARSE),
+                    |name| (name.to_string(), self.to_download_url(name)),
+                ),
+
+                // 仅测试能够快速下载包的 git 镜像源
+                "git-download" => {
+                    let s = dld.collect::<HashSet<String>>();
+
+                    self.delay_tester(
+                        iter,
+                        |name| s.contains(&**name),
+                        |name| (name.to_string(), self.to_download_url(name)),
+                    )
+                }
+
+                // 仅测试所有能够快速下载包的，并且带有 `sparse` 后缀的镜像源
+                "sparse-download" => {
+                    let s = dld.map(|v| v + SPARSE).collect::<HashSet<String>>();
+
+                    self.delay_tester(
+                        iter,
+                        |name| s.contains(&**name),
+                        |name| (name.to_string(), self.to_connected_url(name)),
+                    )
+                }
+
+                _ => {
+                    to_out("参数错误，您不能使用除 \"sparse\"、\"git\"、\"git-download\" 或 \"sparse-download\" 之外的值");
+                    process::exit(19)
+                }
+            },
+
+            None => self.test_download_status(None, Some(1)),
+        };
+
         let found = tested.iter().find(|v| v.1.is_some());
 
         if found.is_none() {
