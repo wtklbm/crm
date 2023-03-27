@@ -17,6 +17,8 @@ use std::{
     time::{Duration, SystemTime},
 };
 
+use ureq::Error;
+
 use crate::constants::{CARGO_CONFIG_PATH, CARGO_HOME, CONFIG, DOT_CARGO, UNC_PREFIX};
 
 pub fn home_dir() -> PathBuf {
@@ -87,26 +89,42 @@ pub fn append_end_spaces(value: &str, total_len: Option<usize>) -> String {
     format!("{}{}", value, pad)
 }
 
-pub fn request(url: &str) -> Option<u128> {
+pub fn request(url: &str, is_connect_only: bool) -> Option<u128> {
     let time = SystemTime::now();
 
     match ureq::get(url).timeout(Duration::from_secs(5)).call() {
         Ok(res) => {
             let status = res.status();
 
-            if status >= 400 {
-                return None;
-            }
-
             if status >= 300 {
                 return match res.header("location") {
-                    Some(v) => request(v),
+                    Some(v) => request(v, is_connect_only),
                     None => None,
                 };
             }
 
+            // 不管是不是 404，只要能连上主机，就成功返回
+            if is_connect_only {
+                return Some(time.elapsed().unwrap().as_millis());
+            }
+
+            if status >= 400 {
+                return None;
+            }
+
             Some(time.elapsed().unwrap().as_millis())
         }
+
+        // 连接成功，但返回的状态不是预期的
+        Err(Error::Status(_, _)) => {
+            if is_connect_only {
+                Some(time.elapsed().unwrap().as_millis())
+            } else {
+                None
+            }
+        }
+
+        // 其他错误，例如连接失败
         Err(_) => None,
     }
 }
@@ -114,6 +132,7 @@ pub fn request(url: &str) -> Option<u128> {
 pub fn network_delay(
     values: Vec<(String, Option<String>)>,
     sender_size: Option<usize>,
+    is_connect_only: bool,
 ) -> Vec<(String, Option<u128>)> {
     let (tx, rx) = mpsc::channel();
     let iter = values.iter();
@@ -126,7 +145,7 @@ pub fn network_delay(
 
         thread::spawn(move || {
             let date = match &v.1 {
-                Some(url) => request(url),
+                Some(url) => request(url, is_connect_only),
                 None => None,
             };
 
