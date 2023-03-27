@@ -109,7 +109,7 @@ impl Registry {
 
     /// 评估网络延迟并自动切换到最优的镜像
     pub fn best(&mut self) {
-        let tested = self.test_status(None, Some(1));
+        let tested = self.test_download_status(None, Some(1));
         let found = tested.iter().find(|v| v.1.is_some());
 
         if found.is_none() {
@@ -123,7 +123,7 @@ impl Registry {
     }
 
     /// 将 `dl` 转换为 `url`
-    fn to_url(&self, name: &str) -> Option<String> {
+    fn to_download_url(&self, name: &str) -> Option<String> {
         match self.rc.get(name) {
             Some(rd) => {
                 let dl = rd.dl.clone();
@@ -141,7 +141,8 @@ impl Registry {
     }
 
     /// 测试镜像源状态
-    fn test_status(
+    /// NOTE 仅 `git` 镜像源支持下载状态测试
+    fn test_download_status(
         &self,
         name: Option<&String>,
         sender_size: Option<usize>,
@@ -153,25 +154,65 @@ impl Registry {
                     process::exit(13);
                 }
 
-                vec![(name.to_string(), self.to_url(name))]
+                vec![(name.to_string(), self.to_download_url(name))]
             }
             None => self
                 .rc
                 .registry_names()
                 .iter()
                 .filter(|name| !name.ends_with("-sparse"))
-                .map(|name| (name.to_string(), self.to_url(name)))
+                .map(|name| (name.to_string(), self.to_download_url(name)))
                 .collect(),
         };
 
-        network_delay(urls, sender_size)
+        network_delay(urls, sender_size, false)
+    }
+
+    /// 将 `dl` 转换为 `url`
+    fn to_connected_url(&self, name: &str) -> Option<String> {
+        match self.rc.get(name) {
+            Some(rd) => {
+                let registry = rd.registry.clone();
+
+                if registry.starts_with("git:") {
+                    return None;
+                }
+
+                Some(registry.replace("sparse+", ""))
+            }
+            None => None,
+        }
+    }
+
+    fn test_connected_status(
+        &self,
+        name: Option<&String>,
+        sender_size: Option<usize>,
+    ) -> Vec<(String, Option<u128>)> {
+        let urls = match name {
+            Some(name) => {
+                if self.rc.get(name).is_none() {
+                    to_out(format!("测试失败，{} 镜像不存在", name));
+                    process::exit(13);
+                }
+
+                vec![(name.to_string(), self.to_connected_url(name))]
+            }
+            None => self
+                .rc
+                .registry_names()
+                .iter()
+                .map(|name| (name.to_string(), self.to_connected_url(name)))
+                .collect(),
+        };
+
+        network_delay(urls, sender_size, true)
     }
 
     /// 测试镜像源延迟
     pub fn test(&self, current: &String, name: Option<&String>) {
-        // 拼接状态字符串
-        let status: Vec<String> = self
-            .test_status(name, None)
+        let connected_status: Vec<String> = self
+            .test_connected_status(name, None)
             .iter()
             .map(|(name, status)| {
                 let prefix = status_prefix(name, current);
@@ -185,7 +226,24 @@ impl Registry {
             })
             .collect();
 
-        println!("{}", status.join("\n"));
+        println!("网络连接延迟:\n{}\n", connected_status.join("\n"));
+
+        let download_status: Vec<String> = self
+            .test_download_status(name, None)
+            .iter()
+            .map(|(name, status)| {
+                let prefix = status_prefix(name, current);
+                let name = append_end_spaces(name, None);
+                let status = match status {
+                    Some(s) => format!("{} ms", s),
+                    None => "failed".to_string(),
+                };
+
+                format!("{}{} -- {}", prefix, name, status)
+            })
+            .collect();
+
+        println!("软件包下载延迟:\n{}", download_status.join("\n"));
     }
 
     /// 使用官方镜像源执行命令
