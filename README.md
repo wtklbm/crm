@@ -74,7 +74,12 @@ $ crm
 ```
 
 
-根据 [反馈](https://github.com/wtklbm/crm/issues/11)，并不建议您使用 `ustc` 镜像源，它会限制并发。
+- 根据 [反馈](https://github.com/wtklbm/crm/issues/11)，并不建议您使用 `ustc` 镜像源，它会限制并发
+- 以下镜像只能在更新 `git` 镜像仓库时获得加速效果，在下载包时无法获得加速效果：
+  - `tuna`
+  - `bfsu`
+  - `nju`
+  - `hit`
 
 
 
@@ -105,6 +110,25 @@ lazy_static = {version = "1.4.0", registry = "sjtu"}
 
 
 > NOTE：如果您刚安装 `crm`，那么请在终端执行一次：`crm default`，然后就可以在项目的 `Cargo.toml` 文件中配置 `registry` 属性了。
+
+
+
+## 使用 `sparse` 协议
+
+在 `v1.68.0` 版本中，新增了一个 `sparse` 协议。以前我们更新注册表默认都是通过克隆 `git` 仓库来实现的，在更新 `git` 仓库时会出现明显的延迟，通过 `sparse` 协议，可以使用 HTTPS 从网络上下载您所需要的包。虽然该协议避免了 `git` 克隆的步骤，但是当镜像源的网络不稳定时，您可能会得到类似于 `spurious network error (2 tries remaining): [35] SSL connect error (OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to index.crates.io:443 )` 的错误。如果您想使用该协议，请将 `export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse` 加入到 `.bashrc` 或 `.zshrc` 文件中，或者编辑 `~/.cargo/config` 文件：
+
+```bash
+[registries.crates-io]
+protocol = "sparse"
+```
+
+如果您想了解更多的内容，请参考下面的链接：
+ - <https://blog.rust-lang.org/2023/03/09/Rust-1.68.0.html#cargos-sparse-protocol>
+ - <https://doc.rust-lang.org/cargo/reference/config.html#registriescrates-ioprotocol>
+ - <https://github.com/rust-lang/cargo/issues/9069>
+ - <https://internals.rust-lang.org/t/call-for-testing-cargo-sparse-registry/16862/20>
+ - <https://blog.rust-lang.org/2022/06/22/sparse-registry-testing.html>
+
 
 
 
