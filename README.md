@@ -59,7 +59,10 @@ yay -S crm-git
 $ crm
 
   crm best                    评估网络延迟并自动切换到最优的镜像
-  crm current                 获取当前所使用的镜像
+    crm best git              仅评估 git 镜像源
+    crm best sparse           仅评估支持 sparse 协议的镜像源
+    crm best git-download     仅评估能够快速下载软件包的 git 镜像源 (推荐使用)
+    crm best sparse-download  仅评估能够快速下载软件包且支持 sparse 协议的镜像源 (推荐使用)
   crm default                 恢复为官方默认镜像
   crm install [args]          使用官方镜像执行 "cargo install"
   crm list                    从镜像配置文件中获取镜像列表
@@ -115,12 +118,18 @@ lazy_static = {version = "1.4.0", registry = "sjtu"}
 
 ## 使用 `sparse` 协议
 
-在 `v1.68.0` 版本中，新增了一个 `sparse` 协议。以前我们更新注册表默认都是通过克隆 `git` 仓库来实现的，在更新 `git` 仓库时会出现明显的延迟，通过 `sparse` 协议，可以使用 HTTPS 从网络上下载您所需要的包。虽然该协议避免了 `git` 克隆的步骤，但是当镜像源的网络不稳定时，您可能会得到类似于 `spurious network error (2 tries remaining): [35] SSL connect error (OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to index.crates.io:443 )` 的错误。如果您想使用该协议，请将 `export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse` 加入到 `.bashrc` 或 `.zshrc` 文件中，或者编辑 `~/.cargo/config` 文件：
+在 `v1.68.0` 版本中，新增了一个 `sparse` 协议。以前我们更新注册表默认都是通过克隆 `git` 仓库来实现的，在克隆 `git` 仓库时会出现明显的延迟，`sparse` 协议的好处就是不用再克隆镜像源仓库了，而是仅通过 HTTPS 从网络上查询和下载您所需要的包。虽然该协议避免了 `git` 克隆的步骤，但是当镜像源的网络不稳定时较容易出错。
 
-```bash
-[registries.crates-io]
-protocol = "sparse"
-```
+按照官方说法，使用该协议有两种方式：
+
+1. 将 `export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse` 加入到 `.bashrc` 或 `.zshrc` 文件中
+2. 或者编辑 `~/.cargo/config` 文件：
+    ```bash
+    [registries.crates-io]
+    protocol = "sparse"
+    ```
+
+但是，当您使用 `crm` 时，`crm` 自带了一些支持 `sparse` 协议的镜像源，它们是开箱即用的。只须执行 `crm best sparse` 或 `crm best sparse-download` 即可轻松切换到支持 `sparse` 协议的镜像源。
 
 如果您想了解更多的内容，请参考下面的链接：
  - <https://blog.rust-lang.org/2023/03/09/Rust-1.68.0.html#cargos-sparse-protocol>
