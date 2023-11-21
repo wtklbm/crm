@@ -50,6 +50,9 @@ pub const DOT_CARGO: &str = ".cargo";
 /// `${CARGO_HOME}/.cargo` 目录下的 `config` 文件
 pub const CONFIG: &str = "config";
 
+/// `${CARGO_HOME}/.cargo` 目录下的 `config` 文件
+pub const CONFIG_TOML: &str = "config.toml";
+
 /// `dl`
 pub const DL: &str = "dl";
 

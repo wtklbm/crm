@@ -19,7 +19,7 @@ use std::{
 
 use ureq::Error;
 
-use crate::constants::{CARGO_CONFIG_PATH, CARGO_HOME, CONFIG, DOT_CARGO, UNC_PREFIX};
+use crate::constants::{CARGO_CONFIG_PATH, CARGO_HOME, CONFIG, CONFIG_TOML, DOT_CARGO, UNC_PREFIX};
 
 pub fn home_dir() -> PathBuf {
     env::home_dir().unwrap()
@@ -35,6 +35,9 @@ pub fn cargo_home() -> PathBuf {
 pub fn cargo_config_path() -> PathBuf {
     let mut c = cargo_home();
     c.push(CONFIG);
+    if !c.exists() {
+        c.set_file_name(CONFIG_TOML);
+    }
 
     c
 }
