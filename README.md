@@ -112,7 +112,9 @@ lazy_static = {version = "1.4.0", registry = "sjtu"}
 
 
 
-> NOTE：如果您刚安装 `crm`，那么请在终端执行一次：`crm default`，然后就可以在项目的 `Cargo.toml` 文件中配置 `registry` 属性了。
+> NOTE：
+> - 如果您刚安装 `crm`，那么请在终端执行一次：`crm default`，然后就可以在项目的 `Cargo.toml` 文件中配置 `registry` 属性了。
+> - 从 Rust v1.39.0 版本开始，`~/.cargo/config.toml` 将被推荐使用，如果 `~/.cargo/config` 和 `~/.cargo/config.toml` 同时存在，则优先使用 `~/.cargo/config` 配置。
 
 
 
