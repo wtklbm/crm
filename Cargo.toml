@@ -1,6 +1,6 @@
 [package]
 name = "crm"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["wtklbm <wtklbm@gmail.com>"]
 description = "crm can help you easy and fast switch between different cargo registries, now include: sjtu, tuna, ustc, rsproxy, bfsu, nju, hit."
 homepage = "https://github.com/wtklbm/crm"
