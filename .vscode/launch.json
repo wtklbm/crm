@@ -8,6 +8,7 @@
             "cwd": "${workspaceRoot}",
             "program": "${workspaceRoot}/target/debug/${workspaceFolderBasename}",
             "preLaunchTask": "Rust: 构建开发版本",
+            "args": ["list"],
             "env": {
                 "RUST_BACKTRACE": "full"
             }
@@ -20,6 +21,7 @@
             "valuesFormatting": "parseText",
             "target": "./target/debug/${workspaceFolderBasename}.exe",
             "preLaunchTask": "Rust: 构建开发版本",
+            "arguments": "list",
             "env": {
                 "RUST_BACKTRACE": "full"
             }

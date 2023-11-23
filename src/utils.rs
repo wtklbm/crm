@@ -19,7 +19,7 @@ use std::{
 
 use ureq::Error;
 
-use crate::constants::{CARGO_CONFIG_PATH, CARGO_HOME, CONFIG, DOT_CARGO, UNC_PREFIX};
+use crate::constants::{CARGO_CONFIG_PATH, CARGO_HOME, CONFIG, CONFIG_TOML, DOT_CARGO, UNC_PREFIX};
 
 pub fn home_dir() -> PathBuf {
     env::home_dir().unwrap()
@@ -34,7 +34,16 @@ pub fn cargo_home() -> PathBuf {
 
 pub fn cargo_config_path() -> PathBuf {
     let mut c = cargo_home();
+
+    // Cargo 还读取不带 `.toml` 扩展名的配置文件，例如 `~/.cargo/config`
+    // 如果该文件存在，Cargo 将首先使用不带扩展名的文件
+    // https://doc.rust-lang.org/cargo/reference/config.html
     c.push(CONFIG);
+
+    // Rust v1.39 版本中添加了对该 `.toml` 扩展的支持，并且是首选形式
+    if !c.exists() {
+        c.set_file_name(CONFIG_TOML);
+    }
 
     c
 }
