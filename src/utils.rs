@@ -288,6 +288,6 @@ pub fn not_command(command: &str) {
   crm check-update            检测版本更新
 "#;
 
-    to_out(format!("{} 命令无效。参考:\n{}", command, r));
+    to_out(format!("{} 命令无效。参考:\n{}\nHome：<https://github.com/wtklbm/crm>\n", command, r));
     process::exit(4);
 }
