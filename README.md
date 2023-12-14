@@ -15,28 +15,58 @@
 ### 通过 `cargo` 安装
 
 ```bash
-# 在终端执行
+# 在终端中执行
+# NOTE 最好使用官方镜像源来安装或升级
 
-$ cargo install crm
+cargo install crm
 ```
 
 
 
-### `Arch` 安装
+### 在 `Arch Linux` 上安装
 
-您可以从 Arch Linux 用户仓库安装它，感谢 [taotieren](https://github.com/taotieren)。
+您可以从 Arch Linux 用户仓库 (AUR) 中安装它，感谢 [taotieren](https://github.com/taotieren) 为此做出的努力。
 
 - <https://aur.archlinux.org/packages/crm>
 
 ```bash
+# 在终端中执行
+
+# `yay` 是一个 AUR 包管理器，可以使用您喜欢的任何包管理器来安装它，例如 `paru`
 yay -S crm
 ```
 
 - <https://aur.archlinux.org/packages/crm-git>
 
 ```bash
+# 在终端中执行
+
 yay -S crm-git
 ```
+
+> NOTE：`crm` 和 `crm-git` 都是基于源代码来构建二进制文件的，如果不想通过下载源代码的方式来构建，则可以到 [Github Release](https://github.com/wtklbm/crm/releases) 中下载预构建的二进制版本。
+
+
+
+### 手动下载预编译的二进制文件
+
+可以直接从 [Github Release](https://github.com/wtklbm/crm/releases) 下载预编译的二进制版本，将其下载后，保存到任意目录，然后将该目录放到操作系统的 PATH 环境变量中：
+ - 如果使用的是 Windows 11 系统，则可以在搜索框中搜索 "**编辑系统环境变量**"，然后找到 "**环境变量**"，找到用户变量中的 "**Path**"，双击它，并添加自定义路径
+ - 如果使用的是 macOS 或 Linux 系统，则可以将 `export PATH="$PATH:自定义路径"` 添加到 `.zshrc` 或 `.bashrc` 文件中 (取决于使用的是哪种 Shell)
+
+通过这种安装方式，可以更加自由的管理该软件，半年甚至一年不更新也可以正常使用，可以用 `crm check-update` 来查询新版本，并进行更新。若要将 `crm` 批量安装到多台操作系统的话，这样会更加方便快捷。
+
+在下载二进制文件时，可能会遇到下载失败的情况，为此，可以使用 Github 镜像来加速下载。
+
+```bash
+# 在终端中执行
+
+# 使用 `https://hub.gitmirror.com/` 镜像来加速下载
+# 下载哪个版本，就将下面的 URL 部分进行相应的替换即可
+curl -O https://hub.gitmirror.com/https://github.com/wtklbm/crm/releases/download/v0.2.1/crm_windows_amd64.tar.gz
+```
+
+
 
 ## 使用
 
