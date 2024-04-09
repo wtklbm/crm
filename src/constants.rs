@@ -15,6 +15,8 @@ pub const NET: &str = "net";
 /// git-fetch-with-cli = true
 /// ```
 /// 保存之后就解决了 `cargo` 无法连接 `github.com` 的错误
+/// @note 可以使用环境变量 `export CARGO_NET_GIT_FETCH_WITH_CLI="true"` 来进行覆盖
+/// @reference https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
 pub const GIT_FETCH_WITH_CLI: &str = "git-fetch-with-cli";
 
 /// `${CARGO_HOME}/.cargo/config` 文件中的 `[source.crates-io]` 属性
