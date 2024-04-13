@@ -12,9 +12,13 @@ exclude = [".vscode/**"]
 
 [profile.release]
 codegen-units = 1
-incremental = true
-opt-level = 'z'
+opt-level = "z"
 panic = "abort"
+strip = true
+#lto = "fat"
+
+[profile.dev]
+codegen-units = 512
 
 [dependencies]
 toml_edit = "0.2.1"
