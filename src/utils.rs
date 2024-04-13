@@ -8,7 +8,7 @@ use std::{
     env,
     ffi::OsStr,
     fmt::Display,
-    fs::read_to_string,
+    fs::{rename, read_to_string},
     io,
     path::{Path, PathBuf},
     process::{self, Command, Output, Stdio},
@@ -33,19 +33,27 @@ pub fn cargo_home() -> PathBuf {
 }
 
 pub fn cargo_config_path() -> PathBuf {
-    let mut c = cargo_home();
+    let c = cargo_home();
+
+    // Rust v1.39 版本中添加了对该 `.toml` 扩展的支持，并且是首选形式
+    let path = c.join(CONFIG_TOML);
 
     // Cargo 还读取不带 `.toml` 扩展名的配置文件，例如 `~/.cargo/config`
     // 如果该文件存在，Cargo 将首先使用不带扩展名的文件
     // https://doc.rust-lang.org/cargo/reference/config.html
-    c.push(CONFIG);
+    let obsolete_path = c.join(CONFIG);
 
-    // Rust v1.39 版本中添加了对该 `.toml` 扩展的支持，并且是首选形式
-    if !c.exists() {
-        c.set_file_name(CONFIG_TOML);
+    if path.is_file() {
+        if obsolete_path.is_file() {
+            to_out(format!("检测到了两种形式的配置文件，为了避免歧义，请将 {:?} 文件 (不再被推荐使用) 中的内容手动合并到 {:?} 文件中", obsolete_path, path));
+            process::exit(20);
+        }
+    } else if obsolete_path.is_file() {
+        to_out(format!("检测到了 {:?} 配置文件 (不再被推荐使用)，以后请使用 {:?} 配置文件", obsolete_path, path));
+        rename(obsolete_path, &path).unwrap();
     }
 
-    c
+    path
 }
 
 pub fn get_cargo_config() -> String {
@@ -297,6 +305,9 @@ pub fn not_command(command: &str) {
   crm check-update            检测版本更新
 "#;
 
-    to_out(format!("{} 命令无效。参考:\n{}\nHome：<https://github.com/wtklbm/crm>\n", command, r));
+    to_out(format!(
+        "{} 命令无效。参考:\n{}\nHome：<https://github.com/wtklbm/crm>\n",
+        command, r
+    ));
     process::exit(4);
 }
