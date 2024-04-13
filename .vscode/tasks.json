@@ -61,11 +61,6 @@
             "command": "run",
             "args": ["-v", "--all-features"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "focus": true,
                 "clear": true
@@ -75,13 +70,8 @@
             "label": "Rust: Nightly 运行",
             "type": "cargo",
             "command": "+nightly",
-            "args": ["run", "-v", "--all-features","--", "use", "rustcc2"],
+            "args": ["run", "-v", "--all-features"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "focus": true,
                 "clear": true
@@ -93,11 +83,6 @@
             "command": "run",
             "args": ["-v", "-p", "${input:crate}", "--all-features"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "focus": true,
                 "clear": true
@@ -109,11 +94,6 @@
             "command": "+nightly",
             "args": ["run", "-v", "-p", "${input:crate}", "--all-features"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "focus": true,
                 "clear": true
@@ -125,11 +105,6 @@
             "command": "clippy",
             "args": ["-v", "--all-features"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "reveal": "silent",
                 "focus": true,
@@ -142,11 +117,6 @@
             "command": "+nightly",
             "args": ["clippy", "-v", "--all-features"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "reveal": "silent",
                 "focus": true,
@@ -159,11 +129,6 @@
             "command": "build",
             "args": ["-v"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "build",
             "presentation": {
                 "reveal": "silent",
@@ -177,11 +142,6 @@
             "command": "+nightly",
             "args": ["build", "-v"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "build",
             "presentation": {
                 "reveal": "silent",
@@ -195,11 +155,6 @@
             "command": "build",
             "args": ["-v", "--release"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "build",
             "presentation": {
                 "focus": true,
@@ -212,11 +167,6 @@
             "command": "+nightly",
             "args": ["build", "-v", "--release", "-Ztimings"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "build",
             "presentation": {
                 "focus": true,
@@ -229,12 +179,6 @@
             "command": "build",
             "args": ["-v", "--release"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUSTFLAGS": "-C target-cpu=native",
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "build",
             "presentation": {
                 "focus": true,
@@ -247,12 +191,6 @@
             "command": "+nightly",
             "args": ["build", "-v", "--release", "-Ztimings"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUSTFLAGS": "-C target-cpu=native",
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "build",
             "presentation": {
                 "focus": true,
@@ -265,11 +203,6 @@
             "command": "check",
             "args": ["-v"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "reveal": "silent",
                 "focus": true,
@@ -282,11 +215,6 @@
             "command": "+nightly",
             "args": ["check", "-v"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "reveal": "silent",
                 "focus": true,
@@ -299,11 +227,6 @@
             "command": "clean",
             "args": ["-v"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "reveal": "silent",
                 "focus": true,
@@ -316,11 +239,6 @@
             "command": "+nightly",
             "args": ["clean", "-v"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "reveal": "silent",
                 "focus": true,
@@ -339,11 +257,6 @@
                 "--open"
             ],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "reveal": "silent",
                 "focus": false,
@@ -351,7 +264,7 @@
             }
         },
         {
-            "label": "Rust: 文档",
+            "label": "Rust: Nightly 文档",
             "type": "cargo",
             "command": "+nightly",
             "args": [
@@ -363,11 +276,6 @@
                 "--open"
             ],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "reveal": "silent",
                 "focus": false,
@@ -380,11 +288,6 @@
             "command": "test",
             "args": ["-v", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -397,11 +300,6 @@
             "command": "+nightly",
             "args": ["test", "-v", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -414,11 +312,6 @@
             "command": "test",
             "args": ["-v", "--workspace", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -431,11 +324,6 @@
             "command": "test",
             "args": ["${input:test}", "-v", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -448,11 +336,6 @@
             "command": "test",
             "args": ["-v", "--", "--ignored", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -465,11 +348,6 @@
             "command": "test",
             "args": ["-v", "--lib", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -482,11 +360,6 @@
             "command": "test",
             "args": ["-v", "--bins", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -499,11 +372,6 @@
             "command": "test",
             "args": ["-v", "--bin", "${input:crate}", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -516,11 +384,6 @@
             "command": "test",
             "args": ["-v", "--", "--nocapture", "--test-threads=1"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -533,11 +396,6 @@
             "command": "test",
             "args": ["-v", "--examples", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -556,11 +414,6 @@
                 "--nocapture"
             ],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -573,11 +426,6 @@
             "command": "test",
             "args": ["-v", "--doc", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -590,11 +438,6 @@
             "command": "test",
             "args": ["-v", "--benches", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -607,11 +450,6 @@
             "command": "test",
             "args": ["-v", "--bench", "${input:bench}", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -624,11 +462,6 @@
             "command": "test",
             "args": ["-v", "--tests", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -641,11 +474,6 @@
             "command": "test",
             "args": ["-v", "--test", "${input:file}", "--", "--nocapture"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "group": "test",
             "presentation": {
                 "focus": true,
@@ -658,11 +486,6 @@
             "command": "llvm-lines",
             "args": ["--lib"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "focus": true,
                 "clear": true
@@ -674,11 +497,6 @@
             "command": "llvm-lines",
             "args": ["--bin", "${input:crate}"],
             "problemMatcher": ["$rustc"],
-            "options": {
-                "env": {
-                    "RUST_BACKTRACE": "1"
-                }
-            },
             "presentation": {
                 "focus": true,
                 "clear": true
