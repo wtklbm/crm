@@ -1,40 +1,50 @@
 {
     "version": "0.2.0",
     "configurations": [
+        // https://github.com/vadimcn/codelldb/blob/master/MANUAL.md
         {
-            "name": "macOS/Linux: 使用 LLDB 调试",
+            "name": "Windows/*nux: 使用 LLDB 调试",
             "type": "lldb",
             "request": "launch",
             "cwd": "${workspaceRoot}",
-            "program": "${workspaceRoot}/target/debug/${workspaceFolderBasename}",
+            "program": "${cargo:program}",
             "preLaunchTask": "Rust: 构建开发版本",
-            "args": ["list"],
-            "env": {
-                "RUST_BACKTRACE": "full"
-            }
+            "cargo": {
+                "args": ["build"],
+                "problemMatcher": "$rustc",
+                "env": {
+                    "RUST_BACKTRACE": "full"
+                },
+            },
+            "console": "internalConsole"
         },
         {
-            "name": "Windows/Linux: 使用 GDB 调试",
+            "name": "Windows/*nux: 使用 GDB 调试",
             "type": "gdb",
             "request": "launch",
             "cwd": "${workspaceRoot}",
             "valuesFormatting": "parseText",
-            "target": "./target/debug/${workspaceFolderBasename}.exe",
             "preLaunchTask": "Rust: 构建开发版本",
-            "arguments": "list",
+            "arguments": "",
             "env": {
                 "RUST_BACKTRACE": "full"
-            }
+            },
+            "target": "./target/debug/${workspaceFolderBasename}",
+            "windows": {
+                "target": "./target/debug/${workspaceFolderBasename}.exe"
+            },
         },
         {
             "name": "Windows: 使用 MSVC 调试",
             "type": "cppvsdbg",
             "request": "launch",
-            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
+            "args": [],
+            "environment": [
+                { "name": "RUST_BACKTRACE", "value": "full" }
+            ],
+            "console": "internalConsole",
             "program": "./target/debug/${workspaceFolderBasename}.exe",
             "preLaunchTask": "Rust: 构建开发版本"
         }
