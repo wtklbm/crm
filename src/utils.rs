@@ -8,7 +8,7 @@ use std::{
     env,
     ffi::OsStr,
     fmt::Display,
-    fs::{rename, read_to_string},
+    fs::{read_to_string, rename},
     io,
     path::{Path, PathBuf},
     process::{self, Command, Output, Stdio},
@@ -49,7 +49,10 @@ pub fn cargo_config_path() -> PathBuf {
             process::exit(20);
         }
     } else if obsolete_path.is_file() {
-        to_out(format!("检测到了 {:?} 配置文件 (不再被推荐使用)，以后请使用 {:?} 配置文件", obsolete_path, path));
+        to_out(format!(
+            "检测到了 {:?} 配置文件 (不再被推荐使用)，以后请使用 {:?} 配置文件",
+            obsolete_path, path
+        ));
         rename(obsolete_path, &path).unwrap();
     }
 
@@ -245,7 +248,7 @@ pub fn exec_command(command: &str, cwd: Option<&String>) -> io::Result<Output> {
 
     Command::new(program)
         .current_dir(cwd)
-        .args(&[arg_c, command])
+        .args([arg_c, command])
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
