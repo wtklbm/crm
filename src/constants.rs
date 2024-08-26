@@ -100,7 +100,7 @@ dl = "https://mirror.sjtu.edu.cn/crates.io/crates/{crate}/{crate}-{version}.crat
 
 # 中科大
 [source.ustc]
-registry = "git://mirrors.ustc.edu.cn/crates.io-index"
+registry = "https://mirrors.ustc.edu.cn/crates.io-index"
 dl = "https://crates-io.proxy.ustclug.org/api/v1/crates"
 
 # 中科大 - sparse
@@ -149,22 +149,22 @@ registry = "https://mirrors.hit.edu.cn/crates.io-index.git"
 dl = "https://crates.io/api/v1/crates"
 
 # 重庆大学 - sparse
-[source.cqu]
+[source.cqu-sparse]
 registry = "sparse+https://mirrors.cqu.edu.cn/crates.io-index/"
 dl = "https://crates.io/api/v1/crates"
 
 # 浙江大学 - sparse
-[source.zju]
+[source.zju-sparse]
 registry = "sparse+https://mirrors.zju.edu.cn/crates.io-index/"
 dl = "https://crates.io/api/v1/crates"
 
 # CERNET聚合镜像
-[source.bfsu]
+[source.cernet]
 registry = "https://mirrors.cernet.edu.cn/crates.io-index.git"
 dl = "https://crates.io/api/v1/crates"
 
 # CERNET聚合镜像 - sparse
-[source.bfsu-sparse]
+[source.cernet-sparse]
 registry = "sparse+https://mirrors.cernet.edu.cn/crates.io-index/"
 dl = "https://crates.io/api/v1/crates"
 "#;

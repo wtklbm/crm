@@ -14,5 +14,6 @@
         "ureq",
         "ustc",
         "wearerequired"
-    ]
+    ],
+    "rust-analyzer.checkOnSave": true
 }

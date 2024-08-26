@@ -11,7 +11,7 @@ use std::{
     process,
 };
 
-use toml_edit::{table, value};
+use toml_edit::{table, value, Item, Table};
 
 use crate::{
     constants::{
@@ -165,19 +165,19 @@ impl RuntimeConfig {
         }
 
         let mut config = config.unwrap();
-        let data = config.table_mut();
-        let source = &data[SOURCE];
-
-        // 如果没有则创建表，否则判断是不是表
-        if source.is_none() {
+        let data: &mut Table = config.table_mut();
+        if data.contains_key(SOURCE) {
+            let source: &Item = &data[SOURCE];
+            if !source.is_table() {
+                to_out(format!(
+                    "{} 文件中的 {} 字段不是一个{}，{}",
+                    CRMRC_PATH, SOURCE, TABLE, PLEASE_TRY
+                ));
+                process::exit(15);
+            }
+        } else {
             data[SOURCE] = table();
-        } else if !source.is_table() {
-            to_out(format!(
-                "{} 文件中的 {} 字段不是一个{}，{}",
-                CRMRC_PATH, SOURCE, TABLE, PLEASE_TRY
-            ));
-            process::exit(15);
-        }
+        };
 
         config
     }
