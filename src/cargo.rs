@@ -126,7 +126,7 @@ impl CargoConfig {
         } else {
             RUST_LANG
         };
-        println!("{}",name);
+
         // 从配置文件中根据镜像名获取镜像地址
         let addr = data[SOURCE][name][REGISTRY].as_str().map(|v| v.to_string());
 
