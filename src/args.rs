@@ -74,10 +74,10 @@ pub fn handle_command((command, args): Args) {
         "default" => r.default(),
 
         // 切换镜像
-        "use" => r.select(args.get(0)),
+        "use" => r.select(args.first()),
 
         // 删除镜像
-        "remove" => r.remove(args.get(0)),
+        "remove" => r.remove(args.first()),
 
         // 使用官方镜像执行 `cargo publish`
         "publish" => r.publish(args.join(" ")),
@@ -89,7 +89,7 @@ pub fn handle_command((command, args): Args) {
         "install" => r.install(args.join(" ")),
 
         // 对镜像源网络延迟进行评估
-        "test" => r.test(&r.current().0, args.get(0)),
+        "test" => r.test(&r.current().0, args.first()),
 
         // 获取当前镜像
         "current" => {
@@ -108,20 +108,17 @@ pub fn handle_command((command, args): Args) {
 
         // 检查版本更新
         "check-update" => {
-            match get_newest_version() {
-                Some(newest) => {
-                    if newest != APP_VERSION {
-                        return println!("  检测到新版本: {newest}，请切换到官方镜像源以执行更新");
-                    }
+            if let Some(newest) = get_newest_version() {
+                if newest != APP_VERSION {
+                    return println!("  检测到新版本: {newest}，请切换到官方镜像源以执行更新");
                 }
-                None => {}
             };
 
             println!("  暂无更新");
         }
 
         command => {
-            let name = args.get(0);
+            let name = args.first();
             let addr = args.get(1);
             let dl = args.get(2);
 

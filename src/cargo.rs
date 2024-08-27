@@ -122,9 +122,7 @@ impl CargoConfig {
         };
 
         // 从配置文件中根据镜像名获取镜像地址
-        let addr = data[SOURCE][name][REGISTRY]
-            .as_str()
-            .map(|v| v.to_string());
+        let addr = data[SOURCE][name][REGISTRY].as_str().map(|v| v.to_string());
 
         (name.to_string(), addr)
     }
