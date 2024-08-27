@@ -2,7 +2,7 @@
 name        = "crm"
 version     = "0.2.2"
 authors     = ["wtklbm <wtklbm@gmail.com>"]
-description = "crm can help you easy and fast switch between different cargo registries, now include: sjtu, tuna, ustc, rsproxy, bfsu, nju, hit."
+description = "crm can help you easy and fast switch between different cargo registries, now include: sjtu, tuna, ustc, rsproxy, bfsu, nju, hit, cqu, zju, CERNET."
 homepage    = "https://github.com/wtklbm/crm"
 repository  = "https://github.com/wtklbm/crm.git"
 edition     = "2018"
