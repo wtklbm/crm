@@ -72,7 +72,11 @@ impl RuntimeConfig {
 
     /// 将运行时配置中的镜像列表转换为字符串
     pub fn to_string(&self, current: &String, sep: Option<&str>) -> String {
-        let sep = if sep.is_none() { "" } else { Option::unwrap(sep) };
+        let sep = if sep.is_none() {
+            ""
+        } else {
+            Option::unwrap(sep)
+        };
 
         self.iter()
             .fold(String::new(), |mut memo, (k, v)| {
