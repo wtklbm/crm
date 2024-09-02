@@ -80,12 +80,6 @@ impl CargoConfig {
             let source: &mut Table = data[SOURCE].as_table_mut().unwrap();
             if !source.contains_key(CRATES_IO) {
                 data[SOURCE][CRATES_IO] = table();
-            } else {
-                let crates_io = &source[CRATES_IO];
-                if crates_io.is_none() {
-                    field_eprint(CRATES_IO, TABLE);
-                    process::exit(7);
-                }
             }
         };
     }
