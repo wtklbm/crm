@@ -8,20 +8,20 @@ use std::{
     process,
 };
 
-use toml_edit::{Document, Table, TomlError};
+use toml_edit::{DocumentMut, Table, TomlError};
 
 use crate::utils::to_out;
 
 #[derive(Debug)]
 pub struct Toml {
     /// 文档
-    pub doc: Document,
+    pub doc: DocumentMut,
 }
 
 impl Toml {
     /// 解析 `toml` 字符串
     pub fn parse(input: &str) -> Result<Toml, TomlError> {
-        match input.parse::<Document>() {
+        match input.parse::<DocumentMut>() {
             Ok(doc) => Ok(Toml { doc }),
             Err(e) => Err(e),
         }
@@ -39,7 +39,7 @@ impl Toml {
 
     /// 转换为字符串
     pub fn toml_string(&self) -> String {
-        self.doc.to_string_in_original_order().trim().to_string()
+        self.doc.to_string().trim().to_string()
     }
 
     /// 写入到文件中

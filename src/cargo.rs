@@ -5,7 +5,7 @@
 
 use std::process;
 
-use toml_edit::{table, value, Table};
+use toml_edit::{table, value, Item, Table};
 
 use crate::{
     constants::{
@@ -19,17 +19,18 @@ use crate::{
 
 /// 验证字段是否存在
 fn verify_field_exists(data: &mut Table, key: &str) {
-    let value = &data[key];
-
-    if value.is_none() {
+    if data.contains_key(key) {
+        if !data[key].is_table() {
+            field_eprint(key, TABLE);
+            process::exit(5);
+        }
+    } else {
         data[key] = table();
-    } else if !value.is_table() {
-        field_eprint(key, TABLE);
-        process::exit(5);
-    }
+    };
 }
 
 /// `Cargo` 配置对象
+#[derive(Debug)]
 pub struct CargoConfig {
     /// 配置对象中的数据，它是一个经过反序列化的对象
     data: Toml,
@@ -73,15 +74,14 @@ impl CargoConfig {
 
     /// 如果 `Cargo` 配置文件中不包含 `[source.crates-io]` 属性，则为 `Cargo` 配置自动填充。
     fn fill_crates_io(&mut self) {
-        let data = self.data.table_mut();
-        let crates_io = &data[SOURCE][CRATES_IO];
+        let data: &mut Table = self.data.table_mut();
 
-        if crates_io.is_none() {
-            data[SOURCE][CRATES_IO] = table();
-        } else if !crates_io.is_table() {
-            field_eprint(CRATES_IO, TABLE);
-            process::exit(7);
-        }
+        if data.contains_table(SOURCE) {
+            let source: &mut Table = data[SOURCE].as_table_mut().unwrap();
+            if !source.contains_key(CRATES_IO) {
+                data[SOURCE][CRATES_IO] = table();
+            }
+        };
     }
 
     /// 如果切换为默认镜像时，则删除 `replace_with` 属性。否则，
@@ -90,8 +90,8 @@ impl CargoConfig {
     fn replace_with(&mut self, registry_name: &str) {
         self.fill_crates_io();
 
-        let data = self.data.table_mut();
-        let crates_io = &mut data[SOURCE][CRATES_IO];
+        let data: &mut Table = self.data.table_mut();
+        let crates_io: &mut Item = &mut data[SOURCE][CRATES_IO];
 
         // 去除属性
         if registry_name.eq(RUST_LANG) && !crates_io.is_none() {
@@ -106,11 +106,11 @@ impl CargoConfig {
     /// 从 `Cargo` 配置文件中获取正在使用的镜像，其中 `rust-lang` 是 `Cargo` 默认使用的镜像。
     pub fn current(&mut self) -> (String, Option<String>) {
         let data = self.data.table_mut();
-        let replace_with = &data[SOURCE][CRATES_IO][REPLACE_WITH];
 
         // 从配置文件中获取镜像名
-        let name = if !replace_with.is_none() {
-            match replace_with.as_str() {
+        let source = data[SOURCE][CRATES_IO].as_table().unwrap();
+        let name = if source.contains_key(REPLACE_WITH) {
+            match source[REPLACE_WITH].as_value().unwrap().as_str() {
                 Some(name) => name,
                 None => {
                     field_eprint(REPLACE_WITH, STRING);
@@ -129,17 +129,18 @@ impl CargoConfig {
 
     /// 追加属性
     fn append_attribute(&mut self, key: &str, registry_name: &str, addr: &str) {
-        let config = self.data.table_mut();
-        let source = &mut config[key];
-        let registry = &source[registry_name];
+        let config: &mut Table = self.data.table_mut();
+        let source: &mut Item = &mut config[key];
 
-        // 如果没有 `[source.xxx]` 属性
-        if registry.is_none() {
-            source[registry_name] = table();
-        } else if !registry.is_table() {
-            field_eprint(registry_name, TABLE);
-            process::exit(9);
-        }
+        match source.get(registry_name) {
+            Some(x) => {
+                if !x.is_table() {
+                    field_eprint(registry_name, TABLE);
+                    process::exit(9);
+                }
+            }
+            None => source[registry_name] = table(),
+        };
 
         let attr = match key {
             SOURCE => REGISTRY,
@@ -176,12 +177,13 @@ impl CargoConfig {
             return;
         }
 
-        let source = &mut self.data.table_mut()[key];
+        let source: &mut Item = &mut self.data.table_mut()[key];
 
         // 如果没有 `[source.xxx]` 属性
-        if source[registry_name].is_none() {
-            return;
-        }
+        match source.get(registry_name) {
+            Some(_) => (),
+            None => return,
+        };
 
         source
             .as_table_mut()

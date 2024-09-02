@@ -218,8 +218,8 @@ impl Registry {
         let urls = match name {
             Some(name) => {
                 if self.rc.get(name).is_none() {
-                    to_out(format!("测试失败，{} 镜像不存在", name));
-                    process::exit(13);
+                    to_out(format!("下载测试失败，{} 镜像不存在", name));
+                    process::exit(7);
                 }
 
                 vec![(name.to_string(), self.to_download_url(name))]
@@ -260,7 +260,7 @@ impl Registry {
         let urls = match name {
             Some(name) => {
                 if self.rc.get(name).is_none() {
-                    to_out(format!("测试失败，{} 镜像不存在", name));
+                    to_out(format!("连接测试失败，{} 镜像不存在", name));
                     process::exit(13);
                 }
 

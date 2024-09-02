@@ -1,11 +1,11 @@
 [package]
 name        = "crm"
-version     = "0.2.2"
+version     = "0.2.3"
 authors     = ["wtklbm <wtklbm@gmail.com>"]
 description = "crm can help you easy and fast switch between different cargo registries, now include: sjtu, tuna, ustc, rsproxy, bfsu, nju, hit, cqu, zju, CERNET."
 homepage    = "https://github.com/wtklbm/crm"
 repository  = "https://github.com/wtklbm/crm.git"
-edition     = "2018"
+edition     = "2021"
 license     = "MIT OR Apache-2.0"
 keywords    = ["cargo", "registry"]
 exclude     = [".vscode/**"]
@@ -21,5 +21,5 @@ strip         = true
 codegen-units = 512
 
 [dependencies]
-toml_edit = "0.2.1"
-ureq      = "2.1.1"
+toml_edit = "0.22.20"
+ureq      = "2.10.1"

@@ -100,7 +100,7 @@ dl = "https://mirror.sjtu.edu.cn/crates.io/crates/{crate}/{crate}-{version}.crat
 
 # 中科大
 [source.ustc]
-registry = "git://mirrors.ustc.edu.cn/crates.io-index"
+registry = "https://mirrors.ustc.edu.cn/crates.io-index"
 dl = "https://crates-io.proxy.ustclug.org/api/v1/crates"
 
 # 中科大 - sparse
