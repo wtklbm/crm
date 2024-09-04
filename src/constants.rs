@@ -140,11 +140,6 @@ dl = "https://crates.io/api/v1/crates"
 registry = "https://mirror.nju.edu.cn/git/crates.io-index.git"
 dl = "https://crates.io/api/v1/crates"
 
-# 哈尔滨工业大学
-[source.hit]
-registry = "https://mirrors.hit.edu.cn/crates.io-index.git"
-dl = "https://crates.io/api/v1/crates"
-
 # 重庆大学 - sparse
 [source.cqu-sparse]
 registry = "sparse+https://mirrors.cqu.edu.cn/crates.io-index/"
