@@ -161,7 +161,7 @@ impl RuntimeConfig {
 
         if config.is_err() {
             to_out(format!("解析 {} 文件失败，{}", CRMRC_PATH, PLEASE_TRY));
-            process::exit(14);
+            process::exit(12);
         }
 
         let mut config = config.unwrap();
@@ -173,7 +173,7 @@ impl RuntimeConfig {
                     "{} 文件中的 {} 字段不是一个{}，{}",
                     CRMRC_PATH, SOURCE, TABLE, PLEASE_TRY
                 ));
-                process::exit(15);
+                process::exit(12);
             }
         } else {
             data[SOURCE] = table();
@@ -200,7 +200,7 @@ impl RuntimeConfig {
                             "{} 文件中的 [{}.{}] 里没有包含 {} 或 {} 字段, {}",
                             CRMRC_PATH, SOURCE, key, REGISTRY, DL, PLEASE_TRY
                         ));
-                        process::exit(16);
+                        process::exit(12);
                     }
 
                     let registry = r.unwrap().to_string();
@@ -213,7 +213,7 @@ impl RuntimeConfig {
                         "{} 文件中的 {} 字段不是一个 {}, {}",
                         CRMRC_PATH, key, TABLE, PLEASE_TRY
                     ));
-                    process::exit(17);
+                    process::exit(12);
                 }
             });
 
