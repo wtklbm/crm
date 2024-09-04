@@ -52,7 +52,7 @@ impl Toml {
 
         if let Err(e) = write(path, self.toml_string()) {
             to_out(format!("写入文件失败:\n  {}", e));
-            process::exit(18);
+            process::exit(13);
         }
     }
 }
