@@ -64,12 +64,12 @@ impl Registry {
 
         if self.rc.get_default(name).is_some() {
             to_out("请不要删除内置镜像");
-            process::exit(11);
+            process::exit(7);
         }
 
         if self.rc.get_extend(name).is_none() {
             to_out(format!("删除失败，{} 镜像不存在", name));
-            process::exit(12);
+            process::exit(8);
         }
 
         self.rc.remove(name);
@@ -171,7 +171,7 @@ impl Registry {
 
                 _ => {
                     to_out("参数错误，您不能使用除 \"sparse\"、\"git\"、\"git-download\" 或 \"sparse-download\" 之外的值");
-                    process::exit(19)
+                    process::exit(9)
                 }
             },
 
@@ -219,7 +219,7 @@ impl Registry {
             Some(name) => {
                 if self.rc.get(name).is_none() {
                     to_out(format!("下载测试失败，{} 镜像不存在", name));
-                    process::exit(7);
+                    process::exit(10);
                 }
 
                 vec![(name.to_string(), self.to_download_url(name))]
@@ -261,7 +261,7 @@ impl Registry {
             Some(name) => {
                 if self.rc.get(name).is_none() {
                     to_out(format!("连接测试失败，{} 镜像不存在", name));
-                    process::exit(13);
+                    process::exit(11);
                 }
 
                 vec![(name.to_string(), self.to_connected_url(name))]
