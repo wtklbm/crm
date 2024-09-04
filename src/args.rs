@@ -118,9 +118,7 @@ pub fn handle_command((command, args): Args) {
         }
 
         command => {
-            let name = args.first();
-            let addr = args.get(1);
-            let dl = args.get(2);
+            let (name, addr, dl) = (args.get(0), args.get(1), args.get(2));
 
             match command {
                 // 评估网络延迟并自动切换到最优的镜像
