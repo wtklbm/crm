@@ -9,8 +9,8 @@ use toml_edit::{table, value, Item, Table};
 
 use crate::{
     constants::{
-        CARGO_CONFIG_PATH, CRATES_IO, GIT_FETCH_WITH_CLI, NET, PLEASE_TRY, REGISTRIES, REGISTRY,
-        REPLACE_WITH, RUST_LANG, SOURCE, STRING, TABLE,
+        CRATES_IO, GIT_FETCH_WITH_CLI, NET, PLEASE_TRY, REGISTRIES, REGISTRY, REPLACE_WITH,
+        RUST_LANG, SOURCE, STRING, TABLE,
     },
     description::RegistryDescription,
     toml::Toml,
@@ -60,9 +60,10 @@ impl CargoConfig {
             Err(_) => {
                 to_out(format!(
                     "{} 文件解析失败，{}",
-                    CARGO_CONFIG_PATH, PLEASE_TRY
+                    cargo_config_path().display(),
+                    PLEASE_TRY
                 ));
-                process::exit(6);
+                process::exit(5);
             }
         }
     }
@@ -75,13 +76,16 @@ impl CargoConfig {
     /// 如果 `Cargo` 配置文件中不包含 `[source.crates-io]` 属性，则为 `Cargo` 配置自动填充。
     fn fill_crates_io(&mut self) {
         let data: &mut Table = self.data.table_mut();
+        let source: &mut Table = data[SOURCE].as_table_mut().unwrap();
 
-        if data.contains_table(SOURCE) {
-            let source: &mut Table = data[SOURCE].as_table_mut().unwrap();
-            if !source.contains_key(CRATES_IO) {
-                data[SOURCE][CRATES_IO] = table();
+        if source.contains_key(CRATES_IO) {
+            if !source[CRATES_IO].is_table() {
+                field_eprint(format!("[{SOURCE}.{CRATES_IO}]"), TABLE);
+                process::exit(5);
             }
-        };
+        } else {
+            data[SOURCE][CRATES_IO] = table();
+        }
     }
 
     /// 如果切换为默认镜像时，则删除 `replace_with` 属性。否则，
@@ -106,23 +110,38 @@ impl CargoConfig {
     /// 从 `Cargo` 配置文件中获取正在使用的镜像，其中 `rust-lang` 是 `Cargo` 默认使用的镜像。
     pub fn current(&mut self) -> (String, Option<String>) {
         let data = self.data.table_mut();
+        let source = data[SOURCE].as_table().unwrap();
+        let crates_io = source[CRATES_IO].as_table().unwrap();
 
         // 从配置文件中获取镜像名
-        let source = data[SOURCE][CRATES_IO].as_table().unwrap();
-        let name = if source.contains_key(REPLACE_WITH) {
-            match source[REPLACE_WITH].as_value().unwrap().as_str() {
+        let name = if crates_io.contains_key(REPLACE_WITH) {
+            match crates_io[REPLACE_WITH].as_value().unwrap().as_str() {
                 Some(name) => name,
                 None => {
-                    field_eprint(REPLACE_WITH, STRING);
-                    process::exit(8);
+                    field_eprint(
+                        format!("[{SOURCE}.{CRATES_IO}] 下的 {REPLACE_WITH}"),
+                        STRING,
+                    );
+                    process::exit(5);
                 }
             }
         } else {
             RUST_LANG
         };
 
-        // 从配置文件中根据镜像名获取镜像地址
-        let addr = data[SOURCE][name][REGISTRY].as_str().map(|v| v.to_string());
+        if !source.contains_key(name) {
+            field_eprint(format!("[{SOURCE}.{name}]"), TABLE);
+            process::exit(5);
+        }
+
+        let source_name = source[name].as_table().unwrap();
+
+        if !source_name.contains_key(REGISTRY) {
+            field_eprint(format!("[{SOURCE}.{name}] 下的 {REGISTRY}"), STRING);
+            process::exit(5);
+        }
+
+        let addr = source_name[REGISTRY].as_str().map(|v| v.to_string());
 
         (name.to_string(), addr)
     }
@@ -136,7 +155,7 @@ impl CargoConfig {
             Some(x) => {
                 if !x.is_table() {
                     field_eprint(registry_name, TABLE);
-                    process::exit(9);
+                    process::exit(5);
                 }
             }
             None => source[registry_name] = table(),
@@ -146,8 +165,8 @@ impl CargoConfig {
             SOURCE => REGISTRY,
             REGISTRIES => "index",
             _ => {
-                to_out(format!("{:?} 不是预期的属性名", key));
-                process::exit(10);
+                to_out(format!("{key} 不是预期的属性名"));
+                process::exit(6);
             }
         };
 
@@ -180,10 +199,9 @@ impl CargoConfig {
         let source: &mut Item = &mut self.data.table_mut()[key];
 
         // 如果没有 `[source.xxx]` 属性
-        match source.get(registry_name) {
-            Some(_) => (),
-            None => return,
-        };
+        if let None = source.get(registry_name) {
+            return;
+        }
 
         source
             .as_table_mut()
