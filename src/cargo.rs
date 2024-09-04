@@ -50,7 +50,9 @@ impl CargoConfig {
                 verify_field_exists(data, REGISTRIES);
                 verify_field_exists(data, NET);
 
-                if data[NET][GIT_FETCH_WITH_CLI].is_none() {
+                let net = data[NET].as_table().unwrap();
+
+                if !net.contains_key(GIT_FETCH_WITH_CLI) {
                     data[NET][GIT_FETCH_WITH_CLI] = value(true);
                 }
 
@@ -110,35 +112,41 @@ impl CargoConfig {
     /// 从 `Cargo` 配置文件中获取正在使用的镜像，其中 `rust-lang` 是 `Cargo` 默认使用的镜像。
     pub fn current(&mut self) -> (String, Option<String>) {
         let data = self.data.table_mut();
-        let source = data[SOURCE].as_table().unwrap();
-        let crates_io = source[CRATES_IO].as_table().unwrap();
+        let source = data[SOURCE].as_table_mut().unwrap();
 
-        // 从配置文件中获取镜像名
-        let name = if crates_io.contains_key(REPLACE_WITH) {
-            match crates_io[REPLACE_WITH].as_value().unwrap().as_str() {
-                Some(name) => name,
-                None => {
-                    field_eprint(
-                        format!("[{SOURCE}.{CRATES_IO}] 下的 {REPLACE_WITH}"),
-                        STRING,
-                    );
-                    process::exit(5);
+        // 如果 `source` 不包含 `CRATES_IO` 键，则初始化它
+        if !source.contains_key(CRATES_IO) {
+            source[CRATES_IO] = table();
+        }
+
+        let name = {
+            let crates_io = source[CRATES_IO].as_table().unwrap();
+
+            // 从配置文件中获取镜像名
+            if crates_io.contains_key(REPLACE_WITH) {
+                match crates_io[REPLACE_WITH].as_value().unwrap().as_str() {
+                    Some(name) => name,
+                    None => {
+                        field_eprint(
+                            format!("[{SOURCE}.{CRATES_IO}] 下的 {REPLACE_WITH}"),
+                            STRING,
+                        );
+                        process::exit(5);
+                    }
                 }
+            } else {
+                RUST_LANG
             }
-        } else {
-            RUST_LANG
         };
 
         if !source.contains_key(name) {
-            field_eprint(format!("[{SOURCE}.{name}]"), TABLE);
-            process::exit(5);
+            return (name.to_string(), None);
         }
 
         let source_name = source[name].as_table().unwrap();
 
         if !source_name.contains_key(REGISTRY) {
-            field_eprint(format!("[{SOURCE}.{name}] 下的 {REGISTRY}"), STRING);
-            process::exit(5);
+            return (name.to_string(), None);
         }
 
         let addr = source_name[REGISTRY].as_str().map(|v| v.to_string());
