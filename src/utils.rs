@@ -19,7 +19,7 @@ use std::{
 
 use ureq::Error;
 
-use crate::constants::{CARGO_CONFIG_PATH, CARGO_HOME, CONFIG, CONFIG_TOML, DOT_CARGO, UNC_PREFIX};
+use crate::constants::{CARGO_HOME, CONFIG, CONFIG_TOML, DOT_CARGO, UNC_PREFIX};
 
 pub fn home_dir() -> PathBuf {
     env::home_dir().unwrap()
@@ -45,13 +45,14 @@ pub fn cargo_config_path() -> PathBuf {
 
     if path.is_file() {
         if obsolete_path.is_file() {
-            to_out(format!("检测到了两种形式的配置文件，为了避免歧义，请将 {:?} 文件 (不再被推荐使用) 中的内容手动合并到 {:?} 文件中", obsolete_path, path));
-            process::exit(20);
+            to_out(format!("检测到了两种形式的配置文件，为了避免歧义，请将 {} 文件 (不再被推荐使用) 中的内容手动合并到 {} 文件中", obsolete_path.display(), path.display()));
+            process::exit(14);
         }
     } else if obsolete_path.is_file() {
         to_out(format!(
-            "检测到了 {:?} 配置文件 (不再被推荐使用)，以后请使用 {:?} 配置文件",
-            obsolete_path, path
+            "检测到了 {} 配置文件 (不再被推荐使用)，以后请使用 {} 配置文件",
+            obsolete_path.display(),
+            path.display()
         ));
         rename(obsolete_path, &path).unwrap();
     }
@@ -184,10 +185,12 @@ pub fn network_delay(
     ret
 }
 
-pub fn field_eprint(field_name: &str, field_type: &str) {
+pub fn field_eprint<T: Display>(field_name: T, field_type: &str) {
     to_out(format!(
         "{} 文件中的 {} 字段不是一个{}，请修改后重试",
-        CARGO_CONFIG_PATH, field_name, field_type
+        cargo_config_path().display(),
+        field_name,
+        field_type
     ));
 }
 
