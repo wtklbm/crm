@@ -159,4 +159,9 @@ dl = "https://crates.io/api/v1/crates"
 [source.cernet-sparse]
 registry = "sparse+https://mirrors.cernet.edu.cn/crates.io-index/"
 dl = "https://crates.io/api/v1/crates"
+
+# 阿里云 - sparse
+[source.aliyun-sparse]
+registry = "sparse+https://mirrors.aliyun.com/crates.io-index/"
+dl = "https://crates.io/api/v1/crates"
 "#;
