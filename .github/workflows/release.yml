@@ -10,6 +10,9 @@ jobs:
   # 为每个操作系统构建源代码
   github_build:
     name: Build release binaries
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -18,42 +21,50 @@ jobs:
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             name: crm_windows_amd64.tar.gz
+            binary_name: crm.exe
 
           # # 以下构建会报错：
           # # Error: failed to run custom build command for `ring v0.16.20`
           # - target: aarch64-pc-windows-msvc
           #   os: windows-latest
           #   name: crm_windows_arm64.tar.gz
+          #   binary_name: crm.exe
 
           # macOS
           - target: x86_64-apple-darwin
             os: macOS-latest
             name: crm_darwin_amd64.tar.gz
+            binary_name: crm
 
           # - target: aarch64-apple-darwin
           #   os: macOS-latest
           #   name: crm_darwin_arm64.tar.gz
+          #   binary_name: crm
 
           # Linux
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             name: crm_linux_amd64.tar.gz
+            binary_name: crm
 
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     steps:
       - name: Setup | Checkout
         # https://github.com/actions/checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       # 在构建时缓存文件
       - name: Setup | Cache Cargo
         # https://github.com/actions/cache/blob/main/examples.md#rust---cargo
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       # 在 `rustup` 帮助下安装 Rust 工具链
@@ -74,51 +85,81 @@ jobs:
           args: --release --target ${{ matrix.target }}
           use-cross: ${{ matrix.os == 'ubuntu-latest' }}
 
-      - name: Post Build | Prepare artifacts [Windows]
-        if: matrix.os == 'windows-latest'
+      - name: Post Build | Prepare artifacts
         run: |
-          cd target/${{ matrix.target }}/release
-          strip crm.exe
-          7z a ../../../${{ matrix.name }} crm.exe
-          cd -
-      - name: Post Build | Prepare artifacts [-nix]
-        if: matrix.os != 'windows-latest'
+          cd target/${{ matrix.target }}/release || {
+            echo "Cannot open \"target/${{ matrix.target }}/release\"" >&2
+          }
+
+          # 尝试剥离二进制文件的调试符号 (非Windows系统可能会失败)
+          strip ${{ matrix.binary_name }} || true
+
+          # 根据操作系统选择不同的压缩方式
+          # 第一个参数为目标压缩包，第二个参数才是要压缩的文件
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            7z a ../../../${{ matrix.name }} ${{ matrix.binary_name }}
+          else
+            tar czvf ../../../${{ matrix.name }} ${{ matrix.binary_name }}
+          fi
+
+          cd - &>/dev/null
+
+      - name: Verify artifact exists
         run: |
-          cd target/${{ matrix.target }}/release
-          # TODO: investigate better cross platform stripping
-          strip crm || true
-          tar czvf ../../../${{ matrix.name }} crm
-          cd -
+          if [ ! -f "${{ matrix.name }}" ]; then
+            echo "Error: Artifact file ${{ matrix.name }} does not exist, in \"$(pwd)\""
+            ls -ahl
+            exit 1
+          fi
+
       - name: Deploy | Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.name }}
+          compression-level: 9
 
   # 使用 Rust 构建目标和发行说明创建 GitHub 发行版
   github_release:
     name: Create GitHub Release
     needs: github_build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    permissions:
+      contents: write
     steps:
       - name: Setup | Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup | Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           path: release-dist
 
       - name: Setup | Checksums
         run: |
-          ls -lha release-dist
-          for file in release-dist/**/*; do openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"; done
+          ls -ahl release-dist
+
+          if [ ! -d "release-dist" ]; then
+            echo "Error: release-dist directory does not exist, in \"$(pwd)\""
+            exit 1
+          fi
+
+          find release-dist -type f -print0 | while IFS= read -r -d '' file; do
+            echo "Processing file: \"$file\""
+            openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"
+          done
+
+          echo "All files and checksums:"
+          find release-dist -type f -exec ls -la {} \;
 
       - name: Publish
         # https://github.com/softprops/action-gh-release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: release-dist/**/*
         env:
