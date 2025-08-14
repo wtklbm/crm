@@ -6,13 +6,19 @@ on:
     tags:
       - "v*"
 
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+  RUST_LOG: trace
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   # 为每个操作系统构建源代码
   github_build:
     name: Build release binaries
-    defaults:
-      run:
-        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -124,9 +130,6 @@ jobs:
     name: Create GitHub Release
     needs: github_build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     permissions:
       contents: write
     steps:
